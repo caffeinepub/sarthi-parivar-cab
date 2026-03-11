@@ -405,6 +405,7 @@ function CabWebsite() {
     time: "",
     mobile: "",
   });
+  const [localVehicle, setLocalVehicle] = useState("");
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -627,9 +628,9 @@ function CabWebsite() {
   const handleRoundTripSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const rtRates: Record<string, number> = {
-      hatchback: 12,
+      hatchback: 10,
       sedan: 12,
-      suv: 16,
+      suv: 14,
       innova: 18,
       innova_crysta: 22,
     };
@@ -667,15 +668,42 @@ function CabWebsite() {
 
   const handleLocalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const localPkgLabel = localForm.package
+      ? localForm.package.replace(/-/g, " / ").replace(/rs$/, "")
+      : "";
+    const localVehicleLabel =
+      localVehicle.charAt(0).toUpperCase() + localVehicle.slice(1);
     setBookingDetailsData({
-      fare: 0,
+      fare: (() => {
+        const localRates: Record<string, Record<string, number>> = {
+          hatchback: {
+            "4hrs-40km": 1500,
+            "8hrs-80km": 2000,
+            "10hrs-100km": 2200,
+            "12hrs-120km": 2500,
+          },
+          sedan: {
+            "4hrs-40km": 1500,
+            "8hrs-80km": 2000,
+            "10hrs-100km": 2200,
+            "12hrs-120km": 2500,
+          },
+          suv: {
+            "4hrs-40km": 2000,
+            "8hrs-80km": 2500,
+            "10hrs-100km": 2800,
+            "12hrs-120km": 3200,
+          },
+        };
+        return localRates[localVehicle]?.[localForm.package] || 0;
+      })(),
       tripType: "Local",
-      vehicleType: "Local Package",
+      vehicleType: localVehicleLabel || "Local Package",
       date: localForm.date,
       fromCity: localForm.pickup,
-      toCity: localForm.package,
+      toCity: localPkgLabel,
       mobile: localForm.mobile,
-      rawFormData: { ...localForm },
+      rawFormData: { ...localForm, vehicleType: localVehicleLabel },
     });
     setBookingForm((p) => ({ ...p, customerMobile: localForm.mobile }));
     setBookingConfirmed(false);
@@ -793,25 +821,25 @@ function CabWebsite() {
   const testimonials = [
     {
       name: "Rajesh Sharma",
-      city: "Nagpur",
+      city: "Ahmedabad",
       rating: 5,
       text: "Excellent service! The driver was on time, the car was spotless, and the pricing was completely transparent. Highly recommend Sarthi Cab!",
     },
     {
-      name: "Priya Deshmukh",
-      city: "Amravati",
+      name: "Priya Patel",
+      city: "Baroda",
       rating: 5,
-      text: "Booked an Innova for a family trip to Shirdi. Comfortable journey, professional driver, and great value. Will definitely book again!",
+      text: "Booked an Innova for a family trip from Baroda to Ahmedabad. Comfortable journey, professional driver, and great value. Will definitely book again!",
     },
     {
-      name: "Amit Kulkarni",
-      city: "Akola",
+      name: "Amit Shah",
+      city: "Surat",
       rating: 5,
-      text: "Used their one-way service from Nagpur to Wardha. Very smooth experience from booking to drop. Driver was polite and helpful.",
+      text: "Used their one-way service from Surat to Mumbai. Very smooth experience from booking to drop. Driver was polite and helpful.",
     },
     {
-      name: "Sunita Patil",
-      city: "Yavatmal",
+      name: "Sunita Mehta",
+      city: "Mumbai",
       rating: 4,
       text: "Good cab service with friendly drivers. The 24/7 support is really helpful. I was able to reach them even at midnight for my early morning trip.",
     },
@@ -1023,7 +1051,7 @@ function CabWebsite() {
           >
             <span className="inline-flex items-center gap-2 bg-primary/20 text-white border border-primary/40 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4 text-primary" />
-              Trusted Cab Service in Vidarbha
+              Trusted Cab Service in Bharat
             </span>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
               Book Your Ride with{" "}
@@ -1371,39 +1399,39 @@ function CabWebsite() {
                     const fare = rate * dist + addOns;
                     return (
                       <div
-                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
+                        className="mt-4 p-4 rounded-xl border-2 border-orange-400 bg-orange-50 text-orange-900"
                         data-ocid="booking.card"
                       >
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-green-600 text-lg">🧮</span>
-                          <span className="font-bold text-base text-green-800">
+                          <span className="text-orange-500 text-lg">🧮</span>
+                          <span className="font-bold text-base text-orange-800">
                             Fare Estimate —{" "}
                             {owVehicleNames[oneWayForm.vehicleType]}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <span className="text-green-700">Distance:</span>
+                          <span className="text-orange-700">Distance:</span>
                           <span className="font-semibold">{dist} km</span>
-                          <span className="text-green-700">Rate:</span>
+                          <span className="text-orange-700">Rate:</span>
                           <span className="font-semibold">₹{rate}/km</span>
                           {addOns > 0 && (
                             <>
-                              <span className="text-green-700">Add-ons:</span>
+                              <span className="text-orange-700">Add-ons:</span>
                               <span className="font-semibold">
                                 ₹{addOns.toLocaleString("en-IN")}
                               </span>
                             </>
                           )}
                         </div>
-                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
-                          <span className="font-bold text-green-800">
+                        <div className="mt-3 pt-3 border-t border-orange-300 flex justify-between items-center">
+                          <span className="font-bold text-orange-800">
                             Estimated Fare:
                           </span>
-                          <span className="font-bold text-xl text-green-700">
+                          <span className="font-bold text-xl text-orange-700">
                             ₹{fare.toLocaleString("en-IN")}
                           </span>
                         </div>
-                        <p className="mt-2 text-xs text-green-600 italic">
+                        <p className="mt-2 text-xs text-orange-500 italic">
                           * Toll & Parking charges extra
                         </p>
                       </div>
@@ -1654,9 +1682,9 @@ function CabWebsite() {
                     const rtRates: Record<string, number> = {
                       hatchback: 10,
                       sedan: 12,
-                      suv: 15,
-                      innova: 17,
-                      innova_crysta: 20,
+                      suv: 14,
+                      innova: 18,
+                      innova_crysta: 22,
                     };
                     const rtVehicleNames: Record<string, string> = {
                       hatchback: "Hatchback",
@@ -1675,18 +1703,18 @@ function CabWebsite() {
                     const total = baseFare + driverAllowance;
                     return (
                       <div
-                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
+                        className="mt-4 p-4 rounded-xl border-2 border-orange-400 bg-orange-50 text-orange-900"
                         data-ocid="booking.card"
                       >
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-green-600 text-lg">🧮</span>
-                          <span className="font-bold text-base text-green-800">
+                          <span className="text-orange-500 text-lg">🧮</span>
+                          <span className="font-bold text-base text-orange-800">
                             Fare Estimate —{" "}
                             {rtVehicleNames[roundTripForm.vehicleType]}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <span className="text-green-700">
+                          <span className="text-orange-700">
                             Minimum Distance:
                           </span>
                           <span className="font-semibold">
@@ -1695,13 +1723,13 @@ function CabWebsite() {
                               ? "(auto-calculated)"
                               : `(${days} days × 300 km)`}
                           </span>
-                          <span className="text-green-700">Rate:</span>
+                          <span className="text-orange-700">Rate:</span>
                           <span className="font-semibold">₹{rate}/km</span>
-                          <span className="text-green-700">Base Fare:</span>
+                          <span className="text-orange-700">Base Fare:</span>
                           <span className="font-semibold">
                             ₹{baseFare.toLocaleString("en-IN")}
                           </span>
-                          <span className="text-green-700">
+                          <span className="text-orange-700">
                             Driver Allowance:
                           </span>
                           <span className="font-semibold">
@@ -1709,15 +1737,15 @@ function CabWebsite() {
                             days × ₹400)
                           </span>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
-                          <span className="font-bold text-green-800">
+                        <div className="mt-3 pt-3 border-t border-orange-300 flex justify-between items-center">
+                          <span className="font-bold text-orange-800">
                             Total Estimate:
                           </span>
-                          <span className="font-bold text-xl text-green-700">
+                          <span className="font-bold text-xl text-orange-700">
                             ₹{total.toLocaleString("en-IN")}
                           </span>
                         </div>
-                        <p className="mt-2 text-xs text-green-600 italic">
+                        <p className="mt-2 text-xs text-orange-500 italic">
                           * Toll & Parking charges extra
                         </p>
                       </div>
@@ -1740,7 +1768,8 @@ function CabWebsite() {
 
               {/* Local */}
               <TabsContent value="local" className="p-4 sm:p-6">
-                <form onSubmit={handleLocalSubmit}>
+                <form onSubmit={handleLocalSubmit} className="space-y-5">
+                  {/* Pickup City + Date + Time */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-1">
                       <Label
@@ -1751,7 +1780,7 @@ function CabWebsite() {
                       </Label>
                       <CityInput
                         id="local-pickup"
-                        placeholder="e.g. Nagpur"
+                        placeholder="e.g. Surat"
                         value={localForm.pickup}
                         onChange={(v) =>
                           setLocalForm((p) => ({ ...p, pickup: v }))
@@ -1759,33 +1788,6 @@ function CabWebsite() {
                         required
                         dataOcid="booking.input"
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-sm font-semibold">Package</Label>
-                      <Select
-                        value={localForm.package}
-                        onValueChange={(v) =>
-                          setLocalForm((p) => ({ ...p, package: v }))
-                        }
-                      >
-                        <SelectTrigger data-ocid="booking.select">
-                          <SelectValue placeholder="Select package" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="4hrs-40km">
-                            4 Hrs / 40 Km
-                          </SelectItem>
-                          <SelectItem value="8hrs-80km">
-                            8 Hrs / 80 Km
-                          </SelectItem>
-                          <SelectItem value="10hrs-100km">
-                            10 Hrs / 100 Km
-                          </SelectItem>
-                          <SelectItem value="12hrs-120km">
-                            12 Hrs / 120 Km
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -1827,6 +1829,246 @@ function CabWebsite() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Vehicle Type */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold">
+                      Vehicle Type
+                    </Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {[
+                        {
+                          value: "hatchback",
+                          label: "Hatchback",
+                          sub: "Swift, WagonR",
+                          seating: "3+1",
+                          priceRange: "₹1,500 – ₹2,500",
+                        },
+                        {
+                          value: "sedan",
+                          label: "Sedan",
+                          sub: "Honda City, Dzire",
+                          seating: "4+1",
+                          priceRange: "₹1,500 – ₹2,500",
+                        },
+                        {
+                          value: "suv",
+                          label: "SUV",
+                          sub: "Ertiga / Innova",
+                          seating: "6+1",
+                          priceRange: "₹2,000 – ₹3,200",
+                        },
+                      ].map((v) => (
+                        <button
+                          key={v.value}
+                          type="button"
+                          onClick={() => {
+                            setLocalVehicle(v.value);
+                            setLocalForm((p) => ({ ...p, package: "" }));
+                          }}
+                          data-ocid={`booking.${v.value}.card`}
+                          className={`rounded-xl border-2 p-4 text-left transition-all ${
+                            localVehicle === v.value
+                              ? "border-primary bg-primary/10"
+                              : "border-border bg-card hover:border-primary/50"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-bold text-base">
+                              {v.label}
+                            </span>
+                            <span className="text-primary font-bold text-sm">
+                              {v.priceRange}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {v.sub}
+                          </p>
+                          <span className="text-xs text-foreground/80">
+                            👥 {v.seating} seating
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Package Selection */}
+                  {localVehicle && (
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold">
+                        Select Package
+                      </Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {(() => {
+                          const localPkgs: Record<
+                            string,
+                            { label: string; value: string; price: number }[]
+                          > = {
+                            hatchback: [
+                              {
+                                label: "4 Hrs / 40 Km",
+                                value: "4hrs-40km",
+                                price: 1500,
+                              },
+                              {
+                                label: "8 Hrs / 80 Km",
+                                value: "8hrs-80km",
+                                price: 2000,
+                              },
+                              {
+                                label: "10 Hrs / 100 Km",
+                                value: "10hrs-100km",
+                                price: 2200,
+                              },
+                              {
+                                label: "12 Hrs / 120 Km",
+                                value: "12hrs-120km",
+                                price: 2500,
+                              },
+                            ],
+                            sedan: [
+                              {
+                                label: "4 Hrs / 40 Km",
+                                value: "4hrs-40km",
+                                price: 1500,
+                              },
+                              {
+                                label: "8 Hrs / 80 Km",
+                                value: "8hrs-80km",
+                                price: 2000,
+                              },
+                              {
+                                label: "10 Hrs / 100 Km",
+                                value: "10hrs-100km",
+                                price: 2200,
+                              },
+                              {
+                                label: "12 Hrs / 120 Km",
+                                value: "12hrs-120km",
+                                price: 2500,
+                              },
+                            ],
+                            suv: [
+                              {
+                                label: "4 Hrs / 40 Km",
+                                value: "4hrs-40km",
+                                price: 2000,
+                              },
+                              {
+                                label: "8 Hrs / 80 Km",
+                                value: "8hrs-80km",
+                                price: 2500,
+                              },
+                              {
+                                label: "10 Hrs / 100 Km",
+                                value: "10hrs-100km",
+                                price: 2800,
+                              },
+                              {
+                                label: "12 Hrs / 120 Km",
+                                value: "12hrs-120km",
+                                price: 3200,
+                              },
+                            ],
+                          };
+                          return (localPkgs[localVehicle] || []).map((pkg) => (
+                            <button
+                              key={pkg.value}
+                              type="button"
+                              onClick={() =>
+                                setLocalForm((p) => ({
+                                  ...p,
+                                  package: pkg.value,
+                                }))
+                              }
+                              data-ocid="booking.toggle"
+                              className={`rounded-xl border-2 p-3 text-center transition-all ${
+                                localForm.package === pkg.value
+                                  ? "border-primary bg-primary/10"
+                                  : "border-border bg-card hover:border-primary/50"
+                              }`}
+                            >
+                              <div className="font-bold text-primary text-lg">
+                                ₹{pkg.price.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {pkg.label}
+                              </div>
+                            </button>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fare Display */}
+                  {localVehicle &&
+                    localForm.package &&
+                    (() => {
+                      const localRates: Record<
+                        string,
+                        Record<string, number>
+                      > = {
+                        hatchback: {
+                          "4hrs-40km": 1500,
+                          "8hrs-80km": 2000,
+                          "10hrs-100km": 2200,
+                          "12hrs-120km": 2500,
+                        },
+                        sedan: {
+                          "4hrs-40km": 1500,
+                          "8hrs-80km": 2000,
+                          "10hrs-100km": 2200,
+                          "12hrs-120km": 2500,
+                        },
+                        suv: {
+                          "4hrs-40km": 2000,
+                          "8hrs-80km": 2500,
+                          "10hrs-100km": 2800,
+                          "12hrs-120km": 3200,
+                        },
+                      };
+                      const fare =
+                        localRates[localVehicle]?.[localForm.package];
+                      if (!fare) return null;
+                      const pkgLabels: Record<string, string> = {
+                        "4hrs-40km": "4 Hrs / 40 Km",
+                        "8hrs-80km": "8 Hrs / 80 Km",
+                        "10hrs-100km": "10 Hrs / 100 Km",
+                        "12hrs-120km": "12 Hrs / 120 Km",
+                      };
+                      return (
+                        <div
+                          className="p-4 rounded-xl border-2 border-orange-400 bg-orange-50 text-orange-900"
+                          data-ocid="booking.card"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-orange-500 text-lg">🧮</span>
+                            <span className="font-bold text-base text-orange-800">
+                              Estimated Fare
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-4 text-sm">
+                            <span>
+                              🚗{" "}
+                              {localVehicle.charAt(0).toUpperCase() +
+                                localVehicle.slice(1)}
+                            </span>
+                            <span>📦 {pkgLabels[localForm.package]}</span>
+                            <span className="font-bold text-lg text-orange-700">
+                              ₹{fare.toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-orange-600 mt-2">
+                            ⚠️ Toll & Parking: Extra
+                          </p>
+                        </div>
+                      );
+                    })()}
+
+                  {/* Mobile + Submit */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <Label
                         htmlFor="local-mobile"
@@ -1862,7 +2104,7 @@ function CabWebsite() {
                       >
                         {submitInquiry.isPending
                           ? "Submitting..."
-                          : "Book Now \u2192"}
+                          : "Book Now →"}
                       </Button>
                     </div>
                   </div>
@@ -2822,6 +3064,7 @@ function CabWebsite() {
                         time: "",
                         mobile: "",
                       });
+                      setLocalVehicle("");
                     } catch {
                       toast.error(
                         "Booking failed. Please call us directly at 8128932525",
@@ -3021,7 +3264,7 @@ function CabWebsite() {
                         <span className="text-green-800 font-semibold text-sm">
                           💰 Estimated Fare
                         </span>
-                        <span className="text-green-700 font-bold text-lg">
+                        <span className="text-orange-700 font-bold text-lg">
                           ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
                         </span>
                       </div>
