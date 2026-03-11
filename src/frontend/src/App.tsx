@@ -348,15 +348,24 @@ function CityInput({
         data-ocid={dataOcid}
       />
       {open && suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-auto">
+        <ul
+          className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-auto"
+          onMouseDown={(e) => e.preventDefault()}
+        >
           {suggestions.map((city) => (
-            <li
-              key={city}
-              className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors flex items-center gap-2"
-              onMouseDown={() => handleSelect(city)}
-            >
-              <MapPin className="w-3 h-3 flex-shrink-0" />
-              {city}
+            <li key={city}>
+              <button
+                type="button"
+                className="w-full text-left px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors flex items-center gap-2"
+                onClick={() => handleSelect(city)}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  handleSelect(city);
+                }}
+              >
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                {city}
+              </button>
             </li>
           ))}
         </ul>
