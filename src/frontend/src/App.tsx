@@ -1,3 +1,4 @@
+import ClockPicker from "@/components/ClockPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -969,75 +970,6 @@ function CabWebsite() {
     },
   };
 
-  const times = [
-    "00:00",
-    "00:30",
-    "01:00",
-    "01:30",
-    "02:00",
-    "02:30",
-    "03:00",
-    "03:30",
-    "04:00",
-    "04:30",
-    "05:00",
-    "05:30",
-    "06:00",
-    "06:30",
-    "07:00",
-    "07:30",
-    "08:00",
-    "08:30",
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
-    "17:00",
-    "17:30",
-    "18:00",
-    "18:30",
-    "19:00",
-    "19:30",
-    "20:00",
-    "20:30",
-    "21:00",
-    "21:30",
-    "22:00",
-    "22:30",
-    "23:00",
-    "23:30",
-  ];
-  const localTimes = [
-    "00:00",
-    "06:00",
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Sticky Navbar */}
@@ -1295,23 +1227,12 @@ function CabWebsite() {
                       <Label className="text-sm font-semibold">
                         Pickup Time
                       </Label>
-                      <Select
+                      <ClockPicker
                         value={oneWayForm.time}
-                        onValueChange={(v) =>
+                        onChange={(v) =>
                           setOneWayForm((p) => ({ ...p, time: v }))
                         }
-                      >
-                        <SelectTrigger data-ocid="booking.select">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {times.map((t) => (
-                            <SelectItem key={t} value={t}>
-                              {t}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -1949,23 +1870,12 @@ function CabWebsite() {
                       <Label className="text-sm font-semibold">
                         Pickup Time
                       </Label>
-                      <Select
+                      <ClockPicker
                         value={localForm.time}
-                        onValueChange={(v) =>
+                        onChange={(v) =>
                           setLocalForm((p) => ({ ...p, time: v }))
                         }
-                      >
-                        <SelectTrigger data-ocid="booking.select">
-                          <SelectValue placeholder="Select time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {localTimes.map((t) => (
-                            <SelectItem key={t} value={t}>
-                              {t}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      />
                     </div>
                   </div>
 
@@ -3630,14 +3540,36 @@ function CabWebsite() {
                       📱 Pay Advance via UPI / QR Code
                     </p>
                     <div className="flex justify-center mb-3">
-                      <img
-                        src="/assets/uploads/Screenshot_2026-03-11-06-50-55-05_4336b74596784d9a2aa81f87c2016f50-1.jpg"
-                        alt="UPI QR Code"
-                        className="w-48 h-48 object-contain rounded-xl border-2 border-orange-300 shadow-md"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
+                      <a
+                        href={`upi://pay?pa=raktnasha@oksbi&pn=Sarthi+Cab&am=${Math.round(bookingDetailsData.fare * 0.2)}&cu=INR&tn=Sarthi+Cab+Advance+Booking`}
+                        onClick={(e) => {
+                          const amount = Math.round(
+                            bookingDetailsData.fare * 0.2,
+                          );
+                          const upiUrl = `upi://pay?pa=raktnasha@oksbi&pn=Sarthi+Cab&am=${amount}&cu=INR&tn=Sarthi+Cab+Advance+Booking`;
+                          window.location.href = upiUrl;
+                          e.preventDefault();
                         }}
-                      />
+                        title="Click to pay via Google Pay / UPI"
+                        className="cursor-pointer block relative group"
+                      >
+                        <img
+                          src="/assets/uploads/Screenshot_2026-03-11-06-50-55-05_4336b74596784d9a2aa81f87c2016f50-1.jpg"
+                          alt="UPI QR Code"
+                          className="w-48 h-48 object-contain rounded-xl border-2 border-orange-300 shadow-md group-hover:opacity-80 transition-opacity"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div className="absolute inset-0 flex items-end justify-center pb-2 pointer-events-none">
+                          <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                            📲 Tap to Pay ₹
+                            {Math.round(
+                              bookingDetailsData.fare * 0.2,
+                            ).toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                      </a>
                     </div>
                     <div className="space-y-1">
                       <p className="text-orange-800 font-semibold text-sm">
@@ -3693,48 +3625,64 @@ function CabWebsite() {
                         </p>
                       </div>
                     ) : (
-                      <label
-                        className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-white hover:bg-blue-50 transition-colors"
-                        data-ocid="booking.upload_button"
-                      >
-                        <div className="flex flex-col items-center justify-center pt-2 pb-2">
-                          <svg
-                            className="w-8 h-8 mb-1 text-blue-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
+                      <div className="w-full space-y-2">
+                        <div className="flex gap-2">
+                          {/* Gallery Option */}
+                          <label
+                            className="flex-1 flex flex-col items-center justify-center h-20 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-white hover:bg-blue-50 transition-colors"
+                            data-ocid="booking.upload_button"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            <span className="text-2xl">🖼️</span>
+                            <span className="text-xs text-blue-600 font-medium mt-1">
+                              Gallery
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () =>
+                                    setPaymentScreenshot(
+                                      reader.result as string,
+                                    );
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
                             />
-                          </svg>
-                          <p className="text-sm text-blue-600 font-medium">
-                            Screenshot click karein ya upload karein
-                          </p>
-                          <p className="text-xs text-blue-400">
-                            PNG, JPG, JPEG
-                          </p>
+                          </label>
+                          {/* Camera Option */}
+                          <label className="flex-1 flex flex-col items-center justify-center h-20 border-2 border-dashed border-green-300 rounded-lg cursor-pointer bg-white hover:bg-green-50 transition-colors">
+                            <span className="text-2xl">📷</span>
+                            <span className="text-xs text-green-600 font-medium mt-1">
+                              Camera
+                            </span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () =>
+                                    setPaymentScreenshot(
+                                      reader.result as string,
+                                    );
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
                         </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () =>
-                                setPaymentScreenshot(reader.result as string);
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </label>
+                        <p className="text-xs text-blue-400 text-center">
+                          Gallery se screenshot choose karein ya Camera se photo
+                          lein
+                        </p>
+                      </div>
                     )}
                   </div>
 
