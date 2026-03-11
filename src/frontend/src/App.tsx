@@ -435,6 +435,13 @@ function CabWebsite() {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingDetailsData, setBookingDetailsData] = useState<{
     fare: number;
+    baseFare?: number;
+    addOns?: number;
+    addOnDetails?: {
+      extraBags: number;
+      petAllowed: boolean;
+      confirmedCar: boolean;
+    };
     tripType: string;
     vehicleType: string;
     date: string;
@@ -636,6 +643,13 @@ function CabWebsite() {
       fromCity: oneWayForm.pickup,
       toCity: oneWayForm.drop,
       mobile: oneWayForm.mobile,
+      baseFare: rate * dist,
+      addOns: addOns,
+      addOnDetails: {
+        extraBags: oneWayForm.extraBags || 0,
+        petAllowed: oneWayForm.petAllowed,
+        confirmedCar: oneWayForm.confirmedCar,
+      },
       rawFormData: { ...oneWayForm },
     });
     setBookingForm((p) => ({ ...p, customerMobile: oneWayForm.mobile }));
@@ -3278,13 +3292,62 @@ function CabWebsite() {
                   {/* Fare & Advance Section */}
                   {bookingDetailsData.fare > 0 && (
                     <div className="rounded-xl overflow-hidden border border-orange-300">
-                      <div className="p-3 bg-green-50 border-b border-green-200 flex justify-between items-center">
+                      <div className="p-3 bg-green-50 border-b border-green-200">
                         <span className="text-green-800 font-semibold text-sm">
-                          💰 Estimated Fare
+                          💰 Fare Breakdown
                         </span>
-                        <span className="text-orange-700 font-bold text-lg">
-                          ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
-                        </span>
+                        <div className="mt-2 space-y-1 text-sm">
+                          {bookingDetailsData.baseFare !== undefined && (
+                            <div className="flex justify-between text-gray-700">
+                              <span>Base Fare</span>
+                              <span>
+                                ₹
+                                {bookingDetailsData.baseFare.toLocaleString(
+                                  "en-IN",
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          {bookingDetailsData.addOnDetails &&
+                            bookingDetailsData.addOnDetails.extraBags > 0 && (
+                              <div className="flex justify-between text-gray-600">
+                                <span>
+                                  Extra Luggage (
+                                  {bookingDetailsData.addOnDetails.extraBags}{" "}
+                                  bag
+                                  {bookingDetailsData.addOnDetails.extraBags > 1
+                                    ? "s"
+                                    : ""}
+                                  )
+                                </span>
+                                <span>
+                                  +₹
+                                  {(
+                                    bookingDetailsData.addOnDetails.extraBags *
+                                    150
+                                  ).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                            )}
+                          {bookingDetailsData.addOnDetails?.petAllowed && (
+                            <div className="flex justify-between text-gray-600">
+                              <span>Pet Allowed</span>
+                              <span>+₹399</span>
+                            </div>
+                          )}
+                          {bookingDetailsData.addOnDetails?.confirmedCar && (
+                            <div className="flex justify-between text-gray-600">
+                              <span>Confirmed Car (2022+)</span>
+                              <span>+₹150</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between items-center font-bold text-orange-700 border-t border-orange-200 pt-1 mt-1">
+                            <span>Total Fare</span>
+                            <span className="text-lg">
+                              ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       <div className="p-4 bg-orange-500 flex justify-between items-center">
                         <div>
@@ -3407,9 +3470,54 @@ function CabWebsite() {
                     </p>
                     {bookingDetailsData.fare > 0 && (
                       <>
+                        {bookingDetailsData.baseFare !== undefined && (
+                          <p>
+                            <span className="text-gray-500">Base Fare:</span>{" "}
+                            <strong>
+                              ₹
+                              {bookingDetailsData.baseFare.toLocaleString(
+                                "en-IN",
+                              )}
+                            </strong>
+                          </p>
+                        )}
+                        {bookingDetailsData.addOnDetails &&
+                          bookingDetailsData.addOnDetails.extraBags > 0 && (
+                            <p>
+                              <span className="text-gray-500">
+                                Extra Luggage (
+                                {bookingDetailsData.addOnDetails.extraBags} bag
+                                {bookingDetailsData.addOnDetails.extraBags > 1
+                                  ? "s"
+                                  : ""}
+                                ):
+                              </span>{" "}
+                              <strong>
+                                +₹
+                                {(
+                                  bookingDetailsData.addOnDetails.extraBags *
+                                  150
+                                ).toLocaleString("en-IN")}
+                              </strong>
+                            </p>
+                          )}
+                        {bookingDetailsData.addOnDetails?.petAllowed && (
+                          <p>
+                            <span className="text-gray-500">Pet Allowed:</span>{" "}
+                            <strong>+₹399</strong>
+                          </p>
+                        )}
+                        {bookingDetailsData.addOnDetails?.confirmedCar && (
+                          <p>
+                            <span className="text-gray-500">
+                              Confirmed Car (2022+):
+                            </span>{" "}
+                            <strong>+₹150</strong>
+                          </p>
+                        )}
                         <p>
                           <span className="text-gray-500">Total Fare:</span>{" "}
-                          <strong>
+                          <strong className="text-orange-700">
                             ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
                           </strong>
                         </p>
