@@ -1310,9 +1310,6 @@ function CabWebsite() {
                               <span className="font-bold text-base">
                                 {v.label}
                               </span>
-                              <span className="text-primary font-bold text-lg">
-                                ₹{v.rate}/km
-                              </span>
                             </div>
                             <p className="text-xs text-muted-foreground mb-2">
                               {v.sub}
@@ -2285,9 +2282,6 @@ function CabWebsite() {
                     {car.examples}
                   </p>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-primary font-bold text-lg">
-                      {car.rate}
-                    </span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Users className="w-3 h-3" /> {car.seats} seats
                     </span>
