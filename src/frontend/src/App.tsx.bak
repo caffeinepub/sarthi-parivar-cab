@@ -69,8 +69,6 @@ function CabWebsite() {
     date: "",
     time: "",
     mobile: "",
-    vehicleType: "",
-    distance: "",
   });
   const [roundTripForm, setRoundTripForm] = useState({
     pickup: "",
@@ -78,7 +76,6 @@ function CabWebsite() {
     date: "",
     days: "",
     mobile: "",
-    vehicleType: "",
   });
   const [localForm, setLocalForm] = useState({
     pickup: "",
@@ -120,15 +117,7 @@ function CabWebsite() {
         mobile: oneWayForm.mobile,
       });
       toast.success("Booking inquiry submitted! We'll contact you shortly.");
-      setOneWayForm({
-        pickup: "",
-        drop: "",
-        date: "",
-        time: "",
-        mobile: "",
-        vehicleType: "",
-        distance: "",
-      });
+      setOneWayForm({ pickup: "", drop: "", date: "", time: "", mobile: "" });
     } catch {
       toast.error("Failed to submit. Please call us directly.");
     }
@@ -152,7 +141,6 @@ function CabWebsite() {
         date: "",
         days: "",
         mobile: "",
-        vehicleType: "",
       });
     } catch {
       toast.error("Failed to submit. Please call us directly.");
@@ -228,35 +216,35 @@ function CabWebsite() {
   const fleet = [
     {
       name: "Hatchback",
-      rate: "₹12/km",
+      rate: "\u20b910/km",
       seats: 3,
       img: "/assets/generated/car-hatchback.dim_400x250.png",
       examples: "Swift, WagonR",
     },
     {
       name: "Sedan",
-      rate: "₹15/km",
+      rate: "\u20b911/km",
       seats: 4,
       img: "/assets/generated/car-sedan.dim_400x250.png",
       examples: "Honda City, Dzire",
     },
     {
       name: "SUV Ertiga",
-      rate: "₹18/km",
+      rate: "\u20b913/km",
       seats: 6,
       img: "/assets/generated/car-suv.dim_400x250.png",
       examples: "Maruti Ertiga",
     },
     {
       name: "Innova / Marazzo",
-      rate: "₹20/km",
+      rate: "\u20b917/km",
       seats: 7,
       img: "/assets/generated/car-innova.dim_400x250.png",
       examples: "Innova, Marazzo",
     },
     {
       name: "Innova Crysta",
-      rate: "₹24/km",
+      rate: "\u20b920/km",
       seats: 7,
       img: "/assets/generated/car-innova-crysta.dim_400x250.png",
       examples: "Toyota Innova Crysta",
@@ -683,125 +671,18 @@ function CabWebsite() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-sm font-semibold">
-                        Vehicle Type
-                      </Label>
-                      <Select
-                        value={oneWayForm.vehicleType}
-                        onValueChange={(v) =>
-                          setOneWayForm((p) => ({ ...p, vehicleType: v }))
-                        }
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary text-primary-foreground font-bold"
+                        disabled={submitInquiry.isPending}
+                        data-ocid="booking.submit_button"
                       >
-                        <SelectTrigger data-ocid="booking.select">
-                          <SelectValue placeholder="Select vehicle" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hatchback">
-                            Hatchback (Swift, WagonR)
-                          </SelectItem>
-                          <SelectItem value="sedan">
-                            Sedan (Honda City, Dzire)
-                          </SelectItem>
-                          <SelectItem value="suv">SUV Ertiga</SelectItem>
-                          <SelectItem value="innova">
-                            Innova / Marazzo
-                          </SelectItem>
-                          <SelectItem value="innova_crysta">
-                            Innova Crysta
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                        {submitInquiry.isPending
+                          ? "Submitting..."
+                          : "Explore Cabs \u2192"}
+                      </Button>
                     </div>
-                    <div className="space-y-1">
-                      <Label
-                        htmlFor="ow-distance"
-                        className="text-sm font-semibold"
-                      >
-                        Distance (km)
-                      </Label>
-                      <div className="relative">
-                        <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="ow-distance"
-                          type="number"
-                          min="1"
-                          placeholder="e.g. 250"
-                          className="pl-9"
-                          value={oneWayForm.distance}
-                          onChange={(e) =>
-                            setOneWayForm((p) => ({
-                              ...p,
-                              distance: e.target.value,
-                            }))
-                          }
-                          data-ocid="booking.input"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {(() => {
-                    const owRates: Record<string, number> = {
-                      hatchback: 12,
-                      sedan: 15,
-                      suv: 18,
-                      innova: 20,
-                      innova_crysta: 24,
-                    };
-                    const owVehicleNames: Record<string, string> = {
-                      hatchback: "Hatchback",
-                      sedan: "Sedan",
-                      suv: "SUV Ertiga",
-                      innova: "Innova / Marazzo",
-                      innova_crysta: "Innova Crysta",
-                    };
-                    const rate = owRates[oneWayForm.vehicleType];
-                    const dist = Number.parseFloat(oneWayForm.distance);
-                    if (!rate || !dist || dist <= 0) return null;
-                    const fare = rate * dist;
-                    return (
-                      <div
-                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
-                        data-ocid="booking.card"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-green-600 text-lg">🧮</span>
-                          <span className="font-bold text-base text-green-800">
-                            Fare Estimate —{" "}
-                            {owVehicleNames[oneWayForm.vehicleType]}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <span className="text-green-700">Distance:</span>
-                          <span className="font-semibold">{dist} km</span>
-                          <span className="text-green-700">Rate:</span>
-                          <span className="font-semibold">₹{rate}/km</span>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
-                          <span className="font-bold text-green-800">
-                            Estimated Fare:
-                          </span>
-                          <span className="font-bold text-xl text-green-700">
-                            ₹{fare.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600 italic">
-                          * Toll & Parking charges extra
-                        </p>
-                      </div>
-                    );
-                  })()}
-                  <div className="mt-4">
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary text-primary-foreground font-bold"
-                      disabled={submitInquiry.isPending}
-                      data-ocid="booking.submit_button"
-                    >
-                      {submitInquiry.isPending
-                        ? "Submitting..."
-                        : "Explore Cabs →"}
-                    </Button>
                   </div>
                 </form>
               </TabsContent>
@@ -930,117 +811,18 @@ function CabWebsite() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-sm font-semibold">
-                        Vehicle Type
-                      </Label>
-                      <Select
-                        value={roundTripForm.vehicleType}
-                        onValueChange={(v) =>
-                          setRoundTripForm((p) => ({ ...p, vehicleType: v }))
-                        }
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary text-primary-foreground font-bold"
+                        disabled={submitInquiry.isPending}
+                        data-ocid="booking.submit_button"
                       >
-                        <SelectTrigger data-ocid="booking.select">
-                          <SelectValue placeholder="Select vehicle" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hatchback">
-                            Hatchback (Swift, WagonR)
-                          </SelectItem>
-                          <SelectItem value="sedan">
-                            Sedan (Honda City, Dzire)
-                          </SelectItem>
-                          <SelectItem value="suv">SUV Ertiga</SelectItem>
-                          <SelectItem value="innova">
-                            Innova / Marazzo
-                          </SelectItem>
-                          <SelectItem value="innova_crysta">
-                            Innova Crysta
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                        {submitInquiry.isPending
+                          ? "Submitting..."
+                          : "Explore Cabs \u2192"}
+                      </Button>
                     </div>
-                  </div>
-                  {(() => {
-                    const rtRates: Record<string, number> = {
-                      hatchback: 10,
-                      sedan: 12,
-                      suv: 15,
-                      innova: 17,
-                      innova_crysta: 20,
-                    };
-                    const rtVehicleNames: Record<string, string> = {
-                      hatchback: "Hatchback",
-                      sedan: "Sedan",
-                      suv: "SUV Ertiga",
-                      innova: "Innova / Marazzo",
-                      innova_crysta: "Innova Crysta",
-                    };
-                    const rate = rtRates[roundTripForm.vehicleType];
-                    const days = Number.parseInt(roundTripForm.days);
-                    if (!rate || !days || days <= 0) return null;
-                    const minKm = days * 300;
-                    const baseFare = minKm * rate;
-                    const driverAllowance = days * 400;
-                    const total = baseFare + driverAllowance;
-                    return (
-                      <div
-                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
-                        data-ocid="booking.card"
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-green-600 text-lg">🧮</span>
-                          <span className="font-bold text-base text-green-800">
-                            Fare Estimate —{" "}
-                            {rtVehicleNames[roundTripForm.vehicleType]}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                          <span className="text-green-700">
-                            Minimum Distance:
-                          </span>
-                          <span className="font-semibold">
-                            {minKm} km ({days} days × 300 km)
-                          </span>
-                          <span className="text-green-700">Rate:</span>
-                          <span className="font-semibold">₹{rate}/km</span>
-                          <span className="text-green-700">Base Fare:</span>
-                          <span className="font-semibold">
-                            ₹{baseFare.toLocaleString("en-IN")}
-                          </span>
-                          <span className="text-green-700">
-                            Driver Allowance:
-                          </span>
-                          <span className="font-semibold">
-                            ₹{driverAllowance.toLocaleString("en-IN")} ({days}{" "}
-                            days × ₹400)
-                          </span>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
-                          <span className="font-bold text-green-800">
-                            Total Estimate:
-                          </span>
-                          <span className="font-bold text-xl text-green-700">
-                            ₹{total.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600 italic">
-                          * Toll & Parking charges extra
-                        </p>
-                      </div>
-                    );
-                  })()}
-                  <div className="mt-4">
-                    <Button
-                      type="submit"
-                      className="w-full bg-primary text-primary-foreground font-bold"
-                      disabled={submitInquiry.isPending}
-                      data-ocid="booking.submit_button"
-                    >
-                      {submitInquiry.isPending
-                        ? "Submitting..."
-                        : "Explore Cabs →"}
-                    </Button>
                   </div>
                 </form>
               </TabsContent>

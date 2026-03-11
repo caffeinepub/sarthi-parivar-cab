@@ -1,31 +1,30 @@
 # Sarthi Parivar Cab
 
 ## Current State
-New project, no existing code.
+Booking form has One Way, Round Trip, Local tabs. Fleet section shows 5 vehicles with rates. No fare estimation feature exists.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Full cab booking website similar to bookoneway.cab
-- Header with logo, phone, WhatsApp contact buttons
-- Hero section with booking form tabs: One Way, Round Trip, Local
-- Booking form fields: Pickup City, Drop City, Date, Time, Mobile
-- "Why Choose Us" features section (Clean Car, Transparent Billing, Reliable Service, Professional Drivers)
-- Vehicle fleet section (Hatchback, Sedan, SUV Ertiga, Innova, Innova Crysta) with per-km rates
-- How It Works 4-step section
-- Customer testimonials section
-- Contact section with phone, WhatsApp, email
-- Footer with quick links, social media, copyright
-- Floating WhatsApp and call buttons
+- Vehicle type selector in One Way and Round Trip forms
+- Distance (km) input field in One Way and Round Trip forms
+- Live fare estimate card that auto-calculates and shows breakdown
+- One Way rates per vehicle type
+- Round Trip rates per vehicle type with 300km/day minimum + ₹400/day driver allowance
+- "Toll & Parking extra" note in all fare estimates
 
 ### Modify
-N/A
+- Fleet section rates updated to match new pricing
+- One Way Sedan rate: ₹15/km
+- Round Trip Sedan rate: ₹12/km, 300km/day average, ₹400/day driver allowance
+- Other vehicles scaled proportionally
 
 ### Remove
-N/A
+- Nothing removed
 
 ## Implementation Plan
-1. Backend: store booking inquiries (name, pickup, drop, date, mobile, trip type)
-2. Frontend: single-page website with all sections, orange/saffron color theme matching logo, booking form submits to backend
-3. Contact info: Phone 8128932525, WhatsApp 7499685759, Email atithicab2525@gmail.com
-4. Logo: /assets/uploads/1773183168138-1.png
+1. Add vehicle rate tables (one way and round trip per vehicle)
+2. Add vehicle selector + distance input to One Way form
+3. Add vehicle selector + distance input to Round Trip form (distance auto-fills based on days × 300km)
+4. Add live fare estimate card below each form showing: base fare, driver allowance (RT only), total, toll note
+5. Update fleet section display rates to match new pricing
