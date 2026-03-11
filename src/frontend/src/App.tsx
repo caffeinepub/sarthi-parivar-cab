@@ -312,22 +312,28 @@ function CityInput({
   const suggestions = useCitySuggestions(value);
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const justSelected = useRef(false);
 
   const handleSelect = (city: string) => {
+    justSelected.current = true;
     onChange(city);
     setOpen(false);
   };
 
   const handleBlur = () => {
-    closeTimer.current = setTimeout(() => setOpen(false), 200);
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
   };
 
   const handleFocus = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    if (suggestions.length > 0) setOpen(true);
+    if (suggestions.length > 0 && !justSelected.current) setOpen(true);
   };
 
   useEffect(() => {
+    if (justSelected.current) {
+      justSelected.current = false;
+      return;
+    }
     if (suggestions.length > 0 && value.length >= 2) setOpen(true);
     else if (value.length < 2) setOpen(false);
   }, [suggestions, value]);
