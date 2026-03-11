@@ -11,22 +11,57 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface BookingInquiry {
+  'customerName' : string,
+  'vehicleType' : string,
   'tripType' : string,
-  'name' : [] | [string],
+  'totalFare' : string,
+  'distance' : string,
+  'children' : string,
+  'pickupAddress' : string,
+  'advanceAmount' : string,
   'pickupCity' : string,
   'pickupDate' : string,
+  'addOns' : string,
   'pickupTime' : string,
+  'adults' : string,
   'mobile' : string,
+  'dropAddress' : string,
+  'luggage' : string,
   'dropCity' : string,
+}
+export interface ContactMessage {
+  'name' : string,
+  'email' : string,
+  'message' : string,
+  'phone' : string,
 }
 export interface _SERVICE {
   'getAllInquiries' : ActorMethod<[], Array<[bigint, BookingInquiry]>>,
+  'getContactMessages' : ActorMethod<[], Array<[bigint, ContactMessage]>>,
   'submitContactMessage' : ActorMethod<
     [string, string, string, string],
     undefined
   >,
   'submitInquiry' : ActorMethod<
-    [string, string, string, string, string, string, [] | [string]],
+    [
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+    ],
     undefined
   >,
 }

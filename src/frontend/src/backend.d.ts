@@ -8,16 +8,33 @@ export interface None {
 }
 export type Option<T> = Some<T> | None;
 export interface BookingInquiry {
+    customerName: string;
+    vehicleType: string;
     tripType: string;
-    name?: string;
+    totalFare: string;
+    distance: string;
+    children: string;
+    pickupAddress: string;
+    advanceAmount: string;
     pickupCity: string;
     pickupDate: string;
+    addOns: string;
     pickupTime: string;
+    adults: string;
     mobile: string;
+    dropAddress: string;
+    luggage: string;
     dropCity: string;
+}
+export interface ContactMessage {
+    name: string;
+    email: string;
+    message: string;
+    phone: string;
 }
 export interface backendInterface {
     getAllInquiries(): Promise<Array<[bigint, BookingInquiry]>>;
+    getContactMessages(): Promise<Array<[bigint, ContactMessage]>>;
     submitContactMessage(name: string, email: string, phone: string, message: string): Promise<void>;
-    submitInquiry(tripType: string, pickupCity: string, dropCity: string, pickupDate: string, pickupTime: string, mobile: string, name: string | null): Promise<void>;
+    submitInquiry(tripType: string, pickupCity: string, dropCity: string, pickupDate: string, pickupTime: string, mobile: string, customerName: string, vehicleType: string, pickupAddress: string, dropAddress: string, adults: string, children: string, luggage: string, totalFare: string, advanceAmount: string, addOns: string, distance: string): Promise<void>;
 }

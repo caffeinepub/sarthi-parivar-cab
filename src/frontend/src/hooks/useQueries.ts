@@ -11,7 +11,17 @@ export function useSubmitInquiry() {
       pickupDate: string;
       pickupTime: string;
       mobile: string;
-      name?: string;
+      customerName: string;
+      vehicleType: string;
+      pickupAddress: string;
+      dropAddress: string;
+      adults: string;
+      children: string;
+      luggage: string;
+      totalFare: string;
+      advanceAmount: string;
+      addOns: string;
+      distance: string;
     }) => {
       if (!actor) throw new Error("Not connected");
       return actor.submitInquiry(
@@ -21,7 +31,17 @@ export function useSubmitInquiry() {
         data.pickupDate,
         data.pickupTime,
         data.mobile,
-        data.name ?? null,
+        data.customerName,
+        data.vehicleType,
+        data.pickupAddress,
+        data.dropAddress,
+        data.adults,
+        data.children,
+        data.luggage,
+        data.totalFare,
+        data.advanceAmount,
+        data.addOns,
+        data.distance,
       );
     },
   });

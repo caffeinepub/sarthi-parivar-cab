@@ -9,20 +9,41 @@
 import { IDL } from '@icp-sdk/core/candid';
 
 export const BookingInquiry = IDL.Record({
+  'customerName' : IDL.Text,
+  'vehicleType' : IDL.Text,
   'tripType' : IDL.Text,
-  'name' : IDL.Opt(IDL.Text),
+  'totalFare' : IDL.Text,
+  'distance' : IDL.Text,
+  'children' : IDL.Text,
+  'pickupAddress' : IDL.Text,
+  'advanceAmount' : IDL.Text,
   'pickupCity' : IDL.Text,
   'pickupDate' : IDL.Text,
+  'addOns' : IDL.Text,
   'pickupTime' : IDL.Text,
+  'adults' : IDL.Text,
   'mobile' : IDL.Text,
+  'dropAddress' : IDL.Text,
+  'luggage' : IDL.Text,
   'dropCity' : IDL.Text,
+});
+export const ContactMessage = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+  'message' : IDL.Text,
+  'phone' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
   'getAllInquiries' : IDL.Func(
       [],
       [IDL.Vec(IDL.Tuple(IDL.Nat, BookingInquiry))],
+      ['query'],
+    ),
+  'getContactMessages' : IDL.Func(
       [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, ContactMessage))],
+      ['query'],
     ),
   'submitContactMessage' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
@@ -37,7 +58,17 @@ export const idlService = IDL.Service({
         IDL.Text,
         IDL.Text,
         IDL.Text,
-        IDL.Opt(IDL.Text),
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
       ],
       [],
       [],
@@ -48,20 +79,41 @@ export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
   const BookingInquiry = IDL.Record({
+    'customerName' : IDL.Text,
+    'vehicleType' : IDL.Text,
     'tripType' : IDL.Text,
-    'name' : IDL.Opt(IDL.Text),
+    'totalFare' : IDL.Text,
+    'distance' : IDL.Text,
+    'children' : IDL.Text,
+    'pickupAddress' : IDL.Text,
+    'advanceAmount' : IDL.Text,
     'pickupCity' : IDL.Text,
     'pickupDate' : IDL.Text,
+    'addOns' : IDL.Text,
     'pickupTime' : IDL.Text,
+    'adults' : IDL.Text,
     'mobile' : IDL.Text,
+    'dropAddress' : IDL.Text,
+    'luggage' : IDL.Text,
     'dropCity' : IDL.Text,
+  });
+  const ContactMessage = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Text,
+    'message' : IDL.Text,
+    'phone' : IDL.Text,
   });
   
   return IDL.Service({
     'getAllInquiries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, BookingInquiry))],
+        ['query'],
+      ),
+    'getContactMessages' : IDL.Func(
         [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, ContactMessage))],
+        ['query'],
       ),
     'submitContactMessage' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text],
@@ -76,7 +128,17 @@ export const idlFactory = ({ IDL }) => {
           IDL.Text,
           IDL.Text,
           IDL.Text,
-          IDL.Opt(IDL.Text),
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
         ],
         [],
         [],

@@ -275,6 +275,78 @@ const INDIAN_CITIES = [
   "Dang",
   "Navsari",
   "Valsad",
+  "Bhuj",
+  "Gandhidham",
+  "Anjar",
+  "Mandvi",
+  "Mundra",
+  "Palanpur",
+  "Deesa",
+  "Deodar",
+  "Tharad",
+  "Patan",
+  "Siddhpur",
+  "Himatnagar",
+  "Idar",
+  "Modasa",
+  "Khedbrahma",
+  "Nadiad",
+  "Kapadvanj",
+  "Petlad",
+  "Khambhat",
+  "Vallabh Vidyanagar",
+  "Karamsad",
+  "Borsad",
+  "Anand",
+  "Godhra",
+  "Halol",
+  "Lunawada",
+  "Kalol",
+  "Kadi",
+  "Visnagar",
+  "Unjha",
+  "Vadnagar",
+  "Vapi",
+  "Bilimora",
+  "Chikhli",
+  "Bardoli",
+  "Vyara",
+  "Mandvi",
+  "Mahuva",
+  "Rajula",
+  "Savarkundla",
+  "Lathi",
+  "Gondal",
+  "Jetpur",
+  "Dhoraji",
+  "Upleta",
+  "Wankaner",
+  "Morbi",
+  "Dhrangadhra",
+  "Wadhwan",
+  "Halvad",
+  "Una",
+  "Talaja",
+  "Palitana",
+  "Sihor",
+  "Khambhalia",
+  "Dwarka",
+  "Okha",
+  "Kalyanpur",
+  "Veraval",
+  "Chorwad",
+  "Somnath",
+  "Rajpipla",
+  "Ahwa",
+  "Dahej",
+  "Jambusar",
+  "Dabhoi",
+  "Sankheda",
+  "Limkheda",
+  "Jhalod",
+  "Ghoghamba",
+  "Santrampur",
+  "Shehra",
 ];
 
 // --- City Suggestions Hook ---
@@ -460,6 +532,9 @@ function CabWebsite() {
     luggage: "",
   });
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(
+    null,
+  );
 
   const submitInquiry = useSubmitInquiry();
   const submitContact = useSubmitContact();
@@ -654,6 +729,7 @@ function CabWebsite() {
     });
     setBookingForm((p) => ({ ...p, customerMobile: oneWayForm.mobile }));
     setBookingConfirmed(false);
+    setPaymentScreenshot(null);
     setShowBookingModal(true);
   };
 
@@ -695,6 +771,7 @@ function CabWebsite() {
     });
     setBookingForm((p) => ({ ...p, customerMobile: roundTripForm.mobile }));
     setBookingConfirmed(false);
+    setPaymentScreenshot(null);
     setShowBookingModal(true);
   };
 
@@ -739,6 +816,7 @@ function CabWebsite() {
     });
     setBookingForm((p) => ({ ...p, customerMobile: localForm.mobile }));
     setBookingConfirmed(false);
+    setPaymentScreenshot(null);
     setShowBookingModal(true);
   };
 
@@ -1081,6 +1159,10 @@ function CabWebsite() {
             transition={{ duration: 0.7 }}
             className="text-center mb-8"
           >
+            <div className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg mb-3">
+              <span className="animate-pulse">🕐</span>
+              24 Ghante / 7 Din Booking Available
+            </div>
             <span className="inline-flex items-center gap-2 bg-primary/20 text-white border border-primary/40 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4 text-primary" />
               Trusted Cab Service in Bharat
@@ -2883,40 +2965,163 @@ function CabWebsite() {
                     No booking inquiries yet.
                   </div>
                 ) : (
-                  <div
-                    className="rounded-xl border overflow-hidden"
-                    data-ocid="admin.table"
-                  >
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-orange-50">
-                          <TableHead className="w-12">#</TableHead>
-                          <TableHead>Trip Type</TableHead>
-                          <TableHead>From</TableHead>
-                          <TableHead>To</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Time</TableHead>
-                          <TableHead>Mobile</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {inquiriesQuery.data.map(([id, inquiry], idx) => (
-                          <TableRow key={id.toString()}>
-                            <TableCell className="text-gray-400 text-sm">
-                              {idx + 1}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {inquiry.tripType}
-                            </TableCell>
-                            <TableCell>{inquiry.pickupCity}</TableCell>
-                            <TableCell>{inquiry.dropCity}</TableCell>
-                            <TableCell>{inquiry.pickupDate}</TableCell>
-                            <TableCell>{inquiry.pickupTime}</TableCell>
-                            <TableCell>{inquiry.mobile}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <div className="space-y-4" data-ocid="admin.table">
+                    {inquiriesQuery.data.map(([id, inquiry], idx) => {
+                      const travelersStr = [
+                        inquiry.adults ? `${inquiry.adults} Adult` : "",
+                        inquiry.children ? `${inquiry.children} Child` : "",
+                      ]
+                        .filter(Boolean)
+                        .join(", ");
+                      return (
+                        <div
+                          key={id.toString()}
+                          className="rounded-xl border border-orange-100 bg-white shadow-sm p-4"
+                          data-ocid={`admin.item.${idx + 1}`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-white bg-orange-500 rounded-full px-3 py-1">
+                              #{idx + 1} — {inquiry.tripType?.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {inquiry.pickupDate}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                            {inquiry.customerName && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Naam:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.customerName}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.mobile && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Mobile:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.mobile}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.vehicleType && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Vehicle:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.vehicleType}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.pickupCity && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  From City:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.pickupCity}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.dropCity && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  To City:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.dropCity}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.distance && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Distance:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.distance} km
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.pickupAddress && (
+                              <div className="sm:col-span-2">
+                                <span className="font-semibold text-gray-600">
+                                  Pickup Address:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.pickupAddress}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.dropAddress && (
+                              <div className="sm:col-span-2">
+                                <span className="font-semibold text-gray-600">
+                                  Drop Address:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.dropAddress}
+                                </span>
+                              </div>
+                            )}
+                            {travelersStr && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Travelers:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {travelersStr}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.luggage && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Luggage:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.luggage}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.addOns && (
+                              <div className="sm:col-span-2">
+                                <span className="font-semibold text-gray-600">
+                                  Add-ons:
+                                </span>{" "}
+                                <span className="text-gray-900">
+                                  {inquiry.addOns}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.totalFare && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Total Fare:
+                                </span>{" "}
+                                <span className="font-bold text-orange-600">
+                                  {inquiry.totalFare}
+                                </span>
+                              </div>
+                            )}
+                            {inquiry.advanceAmount && (
+                              <div>
+                                <span className="font-semibold text-gray-600">
+                                  Advance (20%):
+                                </span>{" "}
+                                <span className="font-bold text-gray-900">
+                                  {inquiry.advanceAmount}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -3036,7 +3241,7 @@ function CabWebsite() {
                     Complete Your Booking
                   </h2>
                   <p className="text-orange-100 text-sm mt-0.5">
-                    Fill details to confirm your cab
+                    📅 24/7 Booking — Fill details to confirm your cab
                   </p>
                 </div>
                 <button
@@ -3054,7 +3259,17 @@ function CabWebsite() {
                   onSubmit={async (e) => {
                     e.preventDefault();
                     const d = bookingDetailsData;
-                    const combinedName = `${bookingForm.customerName} | ${bookingForm.customerMobile} | Adults:${bookingForm.adults} Children:${bookingForm.children} | Luggage:${bookingForm.luggage} | Pickup:${bookingForm.pickupAddress} | Drop:${bookingForm.dropAddress}`;
+                    const addOnsStr = [
+                      (d.addOnDetails?.extraBags ?? 0) > 0
+                        ? `Extra Luggage x${d.addOnDetails!.extraBags} (₹${(d.addOnDetails!.extraBags ?? 0) * 150})`
+                        : "",
+                      d.addOnDetails?.petAllowed ? "Pet Allowed (₹399)" : "",
+                      d.addOnDetails?.confirmedCar
+                        ? "Confirmed Car 2022+ (₹150)"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(", ");
                     try {
                       await submitInquiry.mutateAsync({
                         tripType: d.tripType.toLowerCase().replace(" ", "-"),
@@ -3063,9 +3278,26 @@ function CabWebsite() {
                         pickupDate: d.date,
                         pickupTime: "",
                         mobile: bookingForm.customerMobile,
-                        name: combinedName,
+                        customerName: bookingForm.customerName,
+                        vehicleType: d.vehicleType,
+                        pickupAddress: bookingForm.pickupAddress,
+                        dropAddress: bookingForm.dropAddress,
+                        adults: String(bookingForm.adults),
+                        children: String(bookingForm.children),
+                        luggage: bookingForm.luggage,
+                        totalFare:
+                          d.fare > 0
+                            ? `₹${d.fare.toLocaleString("en-IN")}`
+                            : "",
+                        advanceAmount:
+                          d.fare > 0
+                            ? `₹${Math.ceil(d.fare * 0.2).toLocaleString("en-IN")}`
+                            : "",
+                        addOns: addOnsStr,
+                        distance: String(d.rawFormData?.distance || ""),
                       });
                       setBookingConfirmed(true);
+                      setPaymentScreenshot(null);
                       // Reset forms
                       setOneWayForm({
                         pickup: "",
@@ -3409,10 +3641,83 @@ function CabWebsite() {
                     </p>
                   </div>
 
+                  {/* Screenshot Upload Section */}
+                  <div className="rounded-xl border-2 border-blue-200 p-4 bg-blue-50">
+                    <p className="font-bold text-blue-800 text-sm mb-2">
+                      📸 Payment Screenshot Upload (Required)
+                    </p>
+                    <p className="text-blue-600 text-xs mb-3">
+                      UPI payment karne ke baad screenshot yahan upload karein,
+                      tab booking confirm hogi
+                    </p>
+                    {paymentScreenshot ? (
+                      <div className="relative">
+                        <img
+                          src={paymentScreenshot}
+                          alt="Payment Screenshot"
+                          className="w-full max-h-48 object-contain rounded-lg border border-blue-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPaymentScreenshot(null)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                        >
+                          ✕
+                        </button>
+                        <p className="text-green-600 text-xs mt-1 font-semibold text-center">
+                          ✅ Screenshot uploaded!
+                        </p>
+                      </div>
+                    ) : (
+                      <label
+                        className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer bg-white hover:bg-blue-50 transition-colors"
+                        data-ocid="booking.upload_button"
+                      >
+                        <div className="flex flex-col items-center justify-center pt-2 pb-2">
+                          <svg
+                            className="w-8 h-8 mb-1 text-blue-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            />
+                          </svg>
+                          <p className="text-sm text-blue-600 font-medium">
+                            Screenshot click karein ya upload karein
+                          </p>
+                          <p className="text-xs text-blue-400">
+                            PNG, JPG, JPEG
+                          </p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () =>
+                                setPaymentScreenshot(reader.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+
                   <Button
                     type="submit"
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-base rounded-xl"
-                    disabled={submitInquiry.isPending}
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-base rounded-xl disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={submitInquiry.isPending || !paymentScreenshot}
                     data-ocid="booking.confirm_button"
                   >
                     {submitInquiry.isPending ? (
@@ -3420,6 +3725,8 @@ function CabWebsite() {
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Processing...
                       </>
+                    ) : !paymentScreenshot ? (
+                      "Pehle payment screenshot upload karein"
                     ) : (
                       "✅ Confirm Booking"
                     )}
@@ -3557,6 +3864,14 @@ function CabWebsite() {
                     >
                       <Phone className="w-5 h-5" />
                       Send via SMS
+                    </a>
+                    <a
+                      href={`mailto:atithicab2525@gmail.com?subject=${encodeURIComponent(`New Booking - ${bookingForm.customerName}`)}&body=${encodeURIComponent(`Sarthi Cab - New Booking Request\n\nName: ${bookingForm.customerName}\nMobile: ${bookingForm.customerMobile}\nTrip: ${bookingDetailsData.tripType}\nFrom: ${bookingDetailsData.fromCity}\nTo: ${bookingDetailsData.toCity}\nDate: ${bookingDetailsData.date}\nVehicle: ${bookingDetailsData.vehicleType}\nPickup Address: ${bookingForm.pickupAddress}\nDrop Address: ${bookingForm.dropAddress}\nTravellers: ${bookingForm.adults} Adults, ${bookingForm.children} Children\nLuggage: ${bookingForm.luggage || "Not specified"}\nTotal Fare: Rs.${bookingDetailsData.fare}\nAdvance (20%): Rs.${Math.round(bookingDetailsData.fare * 0.2)}\n\nContact: 8128932525`)}`}
+                      className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors"
+                      data-ocid="booking.email_button"
+                    >
+                      <Mail className="w-5 h-5" />
+                      Send via Email
                     </a>
                     <button
                       type="button"

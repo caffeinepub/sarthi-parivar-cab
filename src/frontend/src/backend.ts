@@ -90,34 +90,64 @@ export class ExternalBlob {
     }
 }
 export interface BookingInquiry {
+    customerName: string;
+    vehicleType: string;
     tripType: string;
-    name?: string;
+    totalFare: string;
+    distance: string;
+    children: string;
+    pickupAddress: string;
+    advanceAmount: string;
     pickupCity: string;
     pickupDate: string;
+    addOns: string;
     pickupTime: string;
+    adults: string;
     mobile: string;
+    dropAddress: string;
+    luggage: string;
     dropCity: string;
+}
+export interface ContactMessage {
+    name: string;
+    email: string;
+    message: string;
+    phone: string;
 }
 export interface backendInterface {
     getAllInquiries(): Promise<Array<[bigint, BookingInquiry]>>;
+    getContactMessages(): Promise<Array<[bigint, ContactMessage]>>;
     submitContactMessage(name: string, email: string, phone: string, message: string): Promise<void>;
-    submitInquiry(tripType: string, pickupCity: string, dropCity: string, pickupDate: string, pickupTime: string, mobile: string, name: string | null): Promise<void>;
+    submitInquiry(tripType: string, pickupCity: string, dropCity: string, pickupDate: string, pickupTime: string, mobile: string, customerName: string, vehicleType: string, pickupAddress: string, dropAddress: string, adults: string, children: string, luggage: string, totalFare: string, advanceAmount: string, addOns: string, distance: string): Promise<void>;
 }
-import type { BookingInquiry as _BookingInquiry } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async getAllInquiries(): Promise<Array<[bigint, BookingInquiry]>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllInquiries();
-                return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAllInquiries();
-            return from_candid_vec_n1(this._uploadFile, this._downloadFile, result);
+            return result;
+        }
+    }
+    async getContactMessages(): Promise<Array<[bigint, ContactMessage]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getContactMessages();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getContactMessages();
+            return result;
         }
     }
     async submitContactMessage(arg0: string, arg1: string, arg2: string, arg3: string): Promise<void> {
@@ -134,65 +164,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async submitInquiry(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string | null): Promise<void> {
+    async submitInquiry(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: string, arg8: string, arg9: string, arg10: string, arg11: string, arg12: string, arg13: string, arg14: string, arg15: string, arg16: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.submitInquiry(arg0, arg1, arg2, arg3, arg4, arg5, to_candid_opt_n6(this._uploadFile, this._downloadFile, arg6));
+                const result = await this.actor.submitInquiry(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.submitInquiry(arg0, arg1, arg2, arg3, arg4, arg5, to_candid_opt_n6(this._uploadFile, this._downloadFile, arg6));
+            const result = await this.actor.submitInquiry(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
             return result;
         }
     }
-}
-function from_candid_BookingInquiry_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BookingInquiry): BookingInquiry {
-    return from_candid_record_n4(_uploadFile, _downloadFile, value);
-}
-function from_candid_opt_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
-    return value.length === 0 ? null : value[0];
-}
-function from_candid_record_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    tripType: string;
-    name: [] | [string];
-    pickupCity: string;
-    pickupDate: string;
-    pickupTime: string;
-    mobile: string;
-    dropCity: string;
-}): {
-    tripType: string;
-    name?: string;
-    pickupCity: string;
-    pickupDate: string;
-    pickupTime: string;
-    mobile: string;
-    dropCity: string;
-} {
-    return {
-        tripType: value.tripType,
-        name: record_opt_to_undefined(from_candid_opt_n5(_uploadFile, _downloadFile, value.name)),
-        pickupCity: value.pickupCity,
-        pickupDate: value.pickupDate,
-        pickupTime: value.pickupTime,
-        mobile: value.mobile,
-        dropCity: value.dropCity
-    };
-}
-function from_candid_tuple_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [bigint, _BookingInquiry]): [bigint, BookingInquiry] {
-    return [
-        value[0],
-        from_candid_BookingInquiry_n3(_uploadFile, _downloadFile, value[1])
-    ];
-}
-function from_candid_vec_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _BookingInquiry]>): Array<[bigint, BookingInquiry]> {
-    return value.map((x)=>from_candid_tuple_n2(_uploadFile, _downloadFile, x));
-}
-function to_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
-    return value === null ? candid_none() : candid_some(value);
 }
 export interface CreateActorOptions {
     agent?: Agent;
