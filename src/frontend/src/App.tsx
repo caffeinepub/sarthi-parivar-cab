@@ -46,11 +46,127 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
+
+// --- City Suggestions Hook ---
+function useCitySuggestions(query: string) {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&countrycodes=in&addressdetails=1`,
+          { headers: { "Accept-Language": "en" } },
+        );
+        const data = await res.json();
+        const names: string[] = data.map((item: any) => {
+          const a = item.address;
+          return (
+            a?.city ||
+            a?.town ||
+            a?.village ||
+            a?.county ||
+            item.name ||
+            item.display_name.split(",")[0]
+          );
+        });
+        setSuggestions([...new Set(names)].slice(0, 5));
+      } catch {
+        setSuggestions([]);
+      }
+    }, 300);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [query]);
+
+  return suggestions;
+}
+
+// --- CityInput Component ---
+interface CityInputProps {
+  id?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (val: string) => void;
+  required?: boolean;
+  dataOcid?: string;
+}
+
+function CityInput({
+  id,
+  placeholder,
+  value,
+  onChange,
+  required,
+  dataOcid,
+}: CityInputProps) {
+  const suggestions = useCitySuggestions(value);
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSelect = (city: string) => {
+    onChange(city);
+    setOpen(false);
+  };
+
+  const handleBlur = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  };
+
+  const handleFocus = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (suggestions.length > 0) setOpen(true);
+  };
+
+  useEffect(() => {
+    if (suggestions.length > 0 && value.length >= 3) setOpen(true);
+    else if (value.length < 3) setOpen(false);
+  }, [suggestions, value]);
+
+  return (
+    <div className="relative">
+      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
+      <Input
+        id={id}
+        placeholder={placeholder}
+        className="pl-9"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        autoComplete="off"
+        data-ocid={dataOcid}
+      />
+      {open && suggestions.length > 0 && (
+        <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-auto">
+          {suggestions.map((city) => (
+            <li
+              key={city}
+              className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors flex items-center gap-2"
+              onMouseDown={() => handleSelect(city)}
+            >
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              {city}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function CabWebsite() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,6 +212,67 @@ function CabWebsite() {
 
   const submitInquiry = useSubmitInquiry();
   const submitContact = useSubmitContact();
+
+  const [isFetchingDistance, setIsFetchingDistance] = useState(false);
+
+  const fetchDistance = async (pickup: string, drop: string) => {
+    if (!pickup.trim() || !drop.trim()) {
+      toast.error("Pickup aur Drop city daalein pehle");
+      return;
+    }
+    setIsFetchingDistance(true);
+    try {
+      const geocode = async (city: string) => {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&countrycodes=in`,
+          { headers: { "Accept-Language": "en" } },
+        );
+        const data = await res.json();
+        if (!data || data.length === 0)
+          throw new Error(`City not found: ${city}`);
+        return {
+          lat: Number.parseFloat(data[0].lat),
+          lon: Number.parseFloat(data[0].lon),
+        };
+      };
+      const [p, d] = await Promise.all([geocode(pickup), geocode(drop)]);
+      const routeRes = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${p.lon},${p.lat};${d.lon},${d.lat}?overview=false`,
+      );
+      const routeData = await routeRes.json();
+      if (routeData.code !== "Ok" || !routeData.routes?.length) {
+        throw new Error("Route not found");
+      }
+      const km = Math.round(routeData.routes[0].distance / 1000);
+      setOneWayForm((prev) => ({ ...prev, distance: String(km) }));
+      toast.success(`Distance: ${km} km (road route)`);
+    } catch (_err) {
+      toast.error(
+        "Distance fetch nahi ho saka. City naam check karein ya manually dalein.",
+      );
+    } finally {
+      setIsFetchingDistance(false);
+    }
+  };
+
+  // Auto-fetch distance when both pickup and drop are filled
+  const distanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchDistanceRef = useRef(fetchDistance);
+  fetchDistanceRef.current = fetchDistance;
+
+  useEffect(() => {
+    if (distanceTimerRef.current) clearTimeout(distanceTimerRef.current);
+    const pickup = oneWayForm.pickup;
+    const drop = oneWayForm.drop;
+    if (pickup.trim().length >= 3 && drop.trim().length >= 3) {
+      distanceTimerRef.current = setTimeout(() => {
+        fetchDistanceRef.current(pickup, drop);
+      }, 800);
+    }
+    return () => {
+      if (distanceTimerRef.current) clearTimeout(distanceTimerRef.current);
+    };
+  }, [oneWayForm.pickup, oneWayForm.drop]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -574,23 +751,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="ow-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={oneWayForm.pickup}
-                          onChange={(e) =>
-                            setOneWayForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="ow-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={oneWayForm.pickup}
+                        onChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -599,23 +769,16 @@ function CabWebsite() {
                       >
                         Drop City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="ow-drop"
-                          placeholder="e.g. Mumbai"
-                          className="pl-9"
-                          value={oneWayForm.drop}
-                          onChange={(e) =>
-                            setOneWayForm((p) => ({
-                              ...p,
-                              drop: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="ow-drop"
+                        placeholder="e.g. Mumbai"
+                        value={oneWayForm.drop}
+                        onChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, drop: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -721,12 +884,16 @@ function CabWebsite() {
                         Distance (km)
                       </Label>
                       <div className="relative">
-                        <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        {isFetchingDistance ? (
+                          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                        ) : (
+                          <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        )}
                         <Input
                           id="ow-distance"
                           type="number"
                           min="1"
-                          placeholder="e.g. 250"
+                          placeholder="Auto calculated..."
                           className="pl-9"
                           value={oneWayForm.distance}
                           onChange={(e) =>
@@ -738,6 +905,11 @@ function CabWebsite() {
                           data-ocid="booking.input"
                         />
                       </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {isFetchingDistance
+                          ? "Distance fetch ho raha hai..."
+                          : "City naam dalne ke baad distance automatic aayega"}
+                      </p>
                     </div>
                   </div>
                   {(() => {
@@ -817,23 +989,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="rt-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={roundTripForm.pickup}
-                          onChange={(e) =>
-                            setRoundTripForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="rt-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={roundTripForm.pickup}
+                        onChange={(v) =>
+                          setRoundTripForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -842,23 +1007,16 @@ function CabWebsite() {
                       >
                         Destination City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="rt-dest"
-                          placeholder="e.g. Pune"
-                          className="pl-9"
-                          value={roundTripForm.destination}
-                          onChange={(e) =>
-                            setRoundTripForm((p) => ({
-                              ...p,
-                              destination: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="rt-dest"
+                        placeholder="e.g. Pune"
+                        value={roundTripForm.destination}
+                        onChange={(v) =>
+                          setRoundTripForm((p) => ({ ...p, destination: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -1056,23 +1214,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="local-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={localForm.pickup}
-                          onChange={(e) =>
-                            setLocalForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="local-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={localForm.pickup}
+                        onChange={(v) =>
+                          setLocalForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-sm font-semibold">Package</Label>
