@@ -536,7 +536,6 @@ function CabWebsite() {
   const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(
     null,
   );
-
   const submitInquiry = useSubmitInquiry();
   const submitContact = useSubmitContact();
 
@@ -1262,7 +1261,7 @@ function CabWebsite() {
                     </div>
                     <div className="col-span-full space-y-3">
                       <Label className="text-sm font-semibold">
-                        Vehicle Type (Rate Card)
+                        Vehicle Type
                       </Label>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {[
@@ -2235,7 +2234,7 @@ function CabWebsite() {
       </section>
 
       {/* Fleet */}
-      <section id="fleet" className="py-20 bg-background">
+      <section id="fleet" className="py-20 bg-background hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial="hidden"
@@ -3231,7 +3230,6 @@ function CabWebsite() {
                         distance: String(d.rawFormData?.distance || ""),
                       });
                       setBookingConfirmed(true);
-                      setPaymentScreenshot(null);
                       // Reset forms
                       setOneWayForm({
                         pickup: "",
@@ -3678,7 +3676,7 @@ function CabWebsite() {
                             />
                           </label>
                         </div>
-                        <p className="text-xs text-blue-400 text-center">
+                        <p className="text-blue-500 text-xs text-center">
                           Gallery se screenshot choose karein ya Camera se photo
                           lein
                         </p>
