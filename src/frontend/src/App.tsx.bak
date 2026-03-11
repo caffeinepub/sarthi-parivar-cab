@@ -39,6 +39,7 @@ import {
   Menu,
   MessageCircle,
   Phone,
+  Plus,
   Shield,
   Sparkles,
   Star,
@@ -46,11 +47,323 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { toast } from "sonner";
 
 const queryClient = new QueryClient();
+
+// --- Indian Cities List for Autocomplete ---
+const INDIAN_CITIES = [
+  "Agra",
+  "Ahmedabad",
+  "Ajmer",
+  "Akola",
+  "Aligarh",
+  "Allahabad",
+  "Amravati",
+  "Amritsar",
+  "Anand",
+  "Ankleshwar",
+  "Aurangabad",
+  "Ayodhya",
+  "Azamgarh",
+  "Badlapur",
+  "Bareilly",
+  "Belgaum",
+  "Bhavnagar",
+  "Bhilai",
+  "Bhilwara",
+  "Bhopal",
+  "Bhubaneswar",
+  "Bikaner",
+  "Bilaspur",
+  "Chandigarh",
+  "Chennai",
+  "Chhindwara",
+  "Coimbatore",
+  "Cuttack",
+  "Dadar",
+  "Daman",
+  "Darbhanga",
+  "Darjeeling",
+  "Davangere",
+  "Dehradun",
+  "Delhi",
+  "Dhanbad",
+  "Dharwad",
+  "Durg",
+  "Erode",
+  "Faridabad",
+  "Gandhinagar",
+  "Gaya",
+  "Ghaziabad",
+  "Goa",
+  "Gorakhpur",
+  "Gulbarga",
+  "Guntur",
+  "Gurgaon",
+  "Guwahati",
+  "Gwalior",
+  "Hisar",
+  "Hosur",
+  "Hubli",
+  "Hyderabad",
+  "Imphal",
+  "Indore",
+  "Itanagar",
+  "Jabalpur",
+  "Jaipur",
+  "Jalandhar",
+  "Jalgaon",
+  "Jammu",
+  "Jamnagar",
+  "Jamshedpur",
+  "Jodhpur",
+  "Junagadh",
+  "Kakinada",
+  "Kalyan",
+  "Kanpur",
+  "Karnal",
+  "Kharagpur",
+  "Kochi",
+  "Kolhapur",
+  "Kolkata",
+  "Kollam",
+  "Kota",
+  "Kozhikode",
+  "Kurnool",
+  "Lucknow",
+  "Ludhiana",
+  "Madurai",
+  "Malegaon",
+  "Mangalore",
+  "Mathura",
+  "Meerut",
+  "Mumbai",
+  "Mysore",
+  "Nagpur",
+  "Nashik",
+  "Navi Mumbai",
+  "Nellore",
+  "Noida",
+  "Palghar",
+  "Panvel",
+  "Patna",
+  "Pondicherry",
+  "Pune",
+  "Raipur",
+  "Rajkot",
+  "Ranchi",
+  "Rohtak",
+  "Rourkela",
+  "Salem",
+  "Sangli",
+  "Satara",
+  "Shimla",
+  "Siliguri",
+  "Solapur",
+  "Srinagar",
+  "Surat",
+  "Thane",
+  "Thiruvananthapuram",
+  "Thrissur",
+  "Tiruchirappalli",
+  "Tirunelveli",
+  "Tirupur",
+  "Udaipur",
+  "Ujjain",
+  "Vadodara",
+  "Varanasi",
+  "Vasai",
+  "Vijayawada",
+  "Visakhapatnam",
+  "Warangal",
+  "Nagda",
+  "Nanded",
+  "Latur",
+  "Osmanabad",
+  "Dhule",
+  "Yavatmal",
+  "Amravati",
+  "Chandrapur",
+  "Washim",
+  "Beed",
+  "Parbhani",
+  "Hingoli",
+  "Jalna",
+  "Buldhana",
+  "Wardha",
+  "Gadchiroli",
+  "Gondia",
+  "Ratnagiri",
+  "Sindhudurg",
+  "Kolhapur",
+  "Satara",
+  "Sangli",
+  "Solapur",
+  "Ahmednagar",
+  "Nashik",
+  "Dhule",
+  "Jalgaon",
+  "Nandurbar",
+  "Aurangabad",
+  "Jalna",
+  "Beed",
+  "Osmanabad",
+  "Latur",
+  "Nanded",
+  "Parbhani",
+  "Hingoli",
+  "Buldhana",
+  "Akola",
+  "Washim",
+  "Amravati",
+  "Yavatmal",
+  "Wardha",
+  "Nagpur",
+  "Bhandara",
+  "Gondia",
+  "Chandrapur",
+  "Gadchiroli",
+  "Mumbai",
+  "Thane",
+  "Raigad",
+  "Ratnagiri",
+  "Sindhudurg",
+  "Pune",
+  "Satara",
+  "Sangli",
+  "Ahmedabad",
+  "Surat",
+  "Vadodara",
+  "Rajkot",
+  "Bhavnagar",
+  "Jamnagar",
+  "Junagadh",
+  "Gandhinagar",
+  "Anand",
+  "Mehsana",
+  "Patan",
+  "Banaskantha",
+  "Sabarkantha",
+  "Kheda",
+  "Anand",
+  "Nadiad",
+  "Bharuch",
+  "Ankleswar",
+  "Valsad",
+  "Navsari",
+  "Tapi",
+  "Dang",
+  "Narmada",
+  "Amreli",
+  "Botad",
+  "Gir Somnath",
+  "Porbandar",
+  "Devbhumi Dwarka",
+  "Morbi",
+  "Surendranagar",
+  "Chhota Udaipur",
+  "Dahod",
+  "Panchmahal",
+  "Vadodara",
+  "Narmada",
+  "Bharuch",
+  "Surat",
+  "Tapi",
+  "Dang",
+  "Navsari",
+  "Valsad",
+];
+
+// --- City Suggestions Hook ---
+function useCitySuggestions(query: string) {
+  if (query.length < 2) return [];
+  const q = query.toLowerCase();
+  const results = INDIAN_CITIES.filter(
+    (city) =>
+      city.toLowerCase().startsWith(q) || city.toLowerCase().includes(q),
+  );
+  // prioritize startsWith
+  const starts = results.filter((c) => c.toLowerCase().startsWith(q));
+  const includes = results.filter((c) => !c.toLowerCase().startsWith(q));
+  return [...new Set([...starts, ...includes])].slice(0, 7);
+}
+
+// --- CityInput Component ---
+interface CityInputProps {
+  id?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (val: string) => void;
+  required?: boolean;
+  dataOcid?: string;
+}
+
+function CityInput({
+  id,
+  placeholder,
+  value,
+  onChange,
+  required,
+  dataOcid,
+}: CityInputProps) {
+  const suggestions = useCitySuggestions(value);
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSelect = (city: string) => {
+    onChange(city);
+    setOpen(false);
+  };
+
+  const handleBlur = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 200);
+  };
+
+  const handleFocus = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (suggestions.length > 0) setOpen(true);
+  };
+
+  useEffect(() => {
+    if (suggestions.length > 0 && value.length >= 2) setOpen(true);
+    else if (value.length < 2) setOpen(false);
+  }, [suggestions, value]);
+
+  return (
+    <div className="relative">
+      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10 pointer-events-none" />
+      <Input
+        id={id}
+        placeholder={placeholder}
+        className="pl-9"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        autoComplete="off"
+        data-ocid={dataOcid}
+      />
+      {open && suggestions.length > 0 && (
+        <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-48 overflow-auto">
+          {suggestions.map((city) => (
+            <li
+              key={city}
+              className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors flex items-center gap-2"
+              onMouseDown={() => handleSelect(city)}
+            >
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              {city}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function CabWebsite() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,13 +382,18 @@ function CabWebsite() {
     date: "",
     time: "",
     mobile: "",
+    vehicleType: "",
+    distance: "",
   });
   const [roundTripForm, setRoundTripForm] = useState({
     pickup: "",
     destination: "",
+    dropCities: [] as string[],
     date: "",
     days: "",
     mobile: "",
+    vehicleType: "",
+    distance: "",
   });
   const [localForm, setLocalForm] = useState({
     pickup: "",
@@ -91,8 +409,165 @@ function CabWebsite() {
     message: "",
   });
 
+  // Booking Details Modal State
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingDetailsData, setBookingDetailsData] = useState<{
+    fare: number;
+    tripType: string;
+    vehicleType: string;
+    date: string;
+    fromCity: string;
+    toCity: string;
+    mobile: string;
+    rawFormData: Record<string, any>;
+  } | null>(null);
+  const [bookingForm, setBookingForm] = useState({
+    customerName: "",
+    customerMobile: "",
+    pickupAddress: "",
+    dropAddress: "",
+    adults: 1,
+    children: 0,
+    luggage: "",
+  });
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
   const submitInquiry = useSubmitInquiry();
   const submitContact = useSubmitContact();
+
+  const [isFetchingDistance, setIsFetchingDistance] = useState(false);
+  const [isFetchingRtDistance, setIsFetchingRtDistance] = useState(false);
+
+  const fetchDistance = async (pickup: string, drop: string) => {
+    if (!pickup.trim() || !drop.trim()) {
+      toast.error("Pickup aur Drop city daalein pehle");
+      return;
+    }
+    setIsFetchingDistance(true);
+    try {
+      const geocode = async (city: string) => {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&countrycodes=in`,
+          { headers: { "Accept-Language": "en" } },
+        );
+        const data = await res.json();
+        if (!data || data.length === 0)
+          throw new Error(`City not found: ${city}`);
+        return {
+          lat: Number.parseFloat(data[0].lat),
+          lon: Number.parseFloat(data[0].lon),
+        };
+      };
+      const [p, d] = await Promise.all([geocode(pickup), geocode(drop)]);
+      const routeRes = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${p.lon},${p.lat};${d.lon},${d.lat}?overview=false`,
+      );
+      const routeData = await routeRes.json();
+      if (routeData.code !== "Ok" || !routeData.routes?.length) {
+        throw new Error("Route not found");
+      }
+      const km = Math.round(routeData.routes[0].distance / 1000);
+      setOneWayForm((prev) => ({ ...prev, distance: String(km) }));
+      toast.success(`Distance: ${km} km (road route)`);
+    } catch (_err) {
+      toast.error(
+        "Distance fetch nahi ho saka. City naam check karein ya manually dalein.",
+      );
+    } finally {
+      setIsFetchingDistance(false);
+    }
+  };
+
+  // Auto-fetch distance when both pickup and drop are filled
+  const distanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchDistanceRef = useRef(fetchDistance);
+  fetchDistanceRef.current = fetchDistance;
+
+  useEffect(() => {
+    if (distanceTimerRef.current) clearTimeout(distanceTimerRef.current);
+    const pickup = oneWayForm.pickup;
+    const drop = oneWayForm.drop;
+    if (pickup.trim().length >= 3 && drop.trim().length >= 3) {
+      distanceTimerRef.current = setTimeout(() => {
+        fetchDistanceRef.current(pickup, drop);
+      }, 800);
+    }
+    return () => {
+      if (distanceTimerRef.current) clearTimeout(distanceTimerRef.current);
+    };
+  }, [oneWayForm.pickup, oneWayForm.drop]);
+
+  const fetchRoundTripDistance = async (
+    pickup: string,
+    destination: string,
+    dropCities: string[],
+  ) => {
+    if (!pickup.trim() || !destination.trim()) return;
+    setIsFetchingRtDistance(true);
+    try {
+      const geocodeRt = async (city: string) => {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&countrycodes=in`,
+          { headers: { "Accept-Language": "en" } },
+        );
+        const data = await res.json();
+        if (!data || data.length === 0)
+          throw new Error(`City not found: ${city}`);
+        return {
+          lat: Number.parseFloat(data[0].lat),
+          lon: Number.parseFloat(data[0].lon),
+        };
+      };
+      const allCities = [
+        pickup,
+        ...dropCities.filter((c) => c.trim().length >= 3),
+        destination,
+      ];
+      const coords = await Promise.all(allCities.map(geocodeRt));
+      let totalKm = 0;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const routeRes = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coords[i].lon},${coords[i].lat};${coords[i + 1].lon},${coords[i + 1].lat}?overview=false`,
+        );
+        const routeData = await routeRes.json();
+        if (routeData.code === "Ok" && routeData.routes?.length) {
+          totalKm += Math.round(routeData.routes[0].distance / 1000);
+        }
+      }
+      const roundTripKm = totalKm * 2;
+      setRoundTripForm((prev) => ({ ...prev, distance: String(roundTripKm) }));
+    } catch (_err) {
+      // silently fail
+    } finally {
+      setIsFetchingRtDistance(false);
+    }
+  };
+
+  const rtDistanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchRoundTripDistanceRef = useRef(fetchRoundTripDistance);
+  fetchRoundTripDistanceRef.current = fetchRoundTripDistance;
+
+  useEffect(() => {
+    if (rtDistanceTimerRef.current) clearTimeout(rtDistanceTimerRef.current);
+    const pickup = roundTripForm.pickup;
+    const destination = roundTripForm.destination;
+    if (pickup.trim().length >= 3 && destination.trim().length >= 3) {
+      rtDistanceTimerRef.current = setTimeout(() => {
+        fetchRoundTripDistanceRef.current(
+          pickup,
+          destination,
+          roundTripForm.dropCities,
+        );
+      }, 800);
+    }
+    return () => {
+      if (rtDistanceTimerRef.current) clearTimeout(rtDistanceTimerRef.current);
+    };
+  }, [
+    roundTripForm.pickup,
+    roundTripForm.destination,
+    roundTripForm.dropCities,
+  ]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -107,63 +582,97 @@ function CabWebsite() {
 
   const handleOneWaySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await submitInquiry.mutateAsync({
-        tripType: "one-way",
-        pickupCity: oneWayForm.pickup,
-        dropCity: oneWayForm.drop,
-        pickupDate: oneWayForm.date,
-        pickupTime: oneWayForm.time,
-        mobile: oneWayForm.mobile,
-      });
-      toast.success("Booking inquiry submitted! We'll contact you shortly.");
-      setOneWayForm({ pickup: "", drop: "", date: "", time: "", mobile: "" });
-    } catch {
-      toast.error("Failed to submit. Please call us directly.");
-    }
+    const owRates: Record<string, number> = {
+      hatchback: 12,
+      sedan: 15,
+      suv: 18,
+      innova: 20,
+      innova_crysta: 24,
+    };
+    const owVehicleNames: Record<string, string> = {
+      hatchback: "Hatchback",
+      sedan: "Sedan",
+      suv: "SUV Ertiga",
+      innova: "Innova / Marazzo",
+      innova_crysta: "Innova Crysta",
+    };
+    const rate = owRates[oneWayForm.vehicleType] || 15;
+    const dist = Number.parseFloat(oneWayForm.distance) || 0;
+    const fare = rate * dist;
+    setBookingDetailsData({
+      fare,
+      tripType: "One Way",
+      vehicleType:
+        owVehicleNames[oneWayForm.vehicleType] ||
+        oneWayForm.vehicleType ||
+        "Not selected",
+      date: oneWayForm.date,
+      fromCity: oneWayForm.pickup,
+      toCity: oneWayForm.drop,
+      mobile: oneWayForm.mobile,
+      rawFormData: { ...oneWayForm },
+    });
+    setBookingForm((p) => ({ ...p, customerMobile: oneWayForm.mobile }));
+    setBookingConfirmed(false);
+    setShowBookingModal(true);
   };
 
   const handleRoundTripSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await submitInquiry.mutateAsync({
-        tripType: "round-trip",
-        pickupCity: roundTripForm.pickup,
-        dropCity: roundTripForm.destination,
-        pickupDate: roundTripForm.date,
-        pickupTime: `${roundTripForm.days} days`,
-        mobile: roundTripForm.mobile,
-      });
-      toast.success("Round trip inquiry submitted! We'll contact you shortly.");
-      setRoundTripForm({
-        pickup: "",
-        destination: "",
-        date: "",
-        days: "",
-        mobile: "",
-      });
-    } catch {
-      toast.error("Failed to submit. Please call us directly.");
-    }
+    const rtRates: Record<string, number> = {
+      hatchback: 12,
+      sedan: 12,
+      suv: 16,
+      innova: 18,
+      innova_crysta: 22,
+    };
+    const rtVehicleNames: Record<string, string> = {
+      hatchback: "Hatchback",
+      sedan: "Sedan",
+      suv: "SUV Ertiga",
+      innova: "Innova / Marazzo",
+      innova_crysta: "Innova Crysta",
+    };
+    const days = Number.parseFloat(roundTripForm.days) || 1;
+    const dist = Number.parseFloat(roundTripForm.distance) || days * 300;
+    const rate = rtRates[roundTripForm.vehicleType] || 12;
+    const fare = rate * dist + days * 400;
+    const dropCitiesStr = roundTripForm.dropCities
+      .filter((c) => c.trim())
+      .join(", ");
+    setBookingDetailsData({
+      fare,
+      tripType: "Round Trip",
+      vehicleType:
+        rtVehicleNames[roundTripForm.vehicleType] ||
+        roundTripForm.vehicleType ||
+        "Not selected",
+      date: roundTripForm.date,
+      fromCity: roundTripForm.pickup,
+      toCity: `${roundTripForm.destination}${dropCitiesStr ? ` (via ${dropCitiesStr})` : ""}`,
+      mobile: roundTripForm.mobile,
+      rawFormData: { ...roundTripForm },
+    });
+    setBookingForm((p) => ({ ...p, customerMobile: roundTripForm.mobile }));
+    setBookingConfirmed(false);
+    setShowBookingModal(true);
   };
 
   const handleLocalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await submitInquiry.mutateAsync({
-        tripType: "local",
-        pickupCity: localForm.pickup,
-        dropCity: "",
-        pickupDate: localForm.date,
-        pickupTime: localForm.time,
-        mobile: localForm.mobile,
-        name: localForm.package,
-      });
-      toast.success("Local booking inquiry submitted!");
-      setLocalForm({ pickup: "", package: "", date: "", time: "", mobile: "" });
-    } catch {
-      toast.error("Failed to submit. Please call us directly.");
-    }
+    setBookingDetailsData({
+      fare: 0,
+      tripType: "Local",
+      vehicleType: "Local Package",
+      date: localForm.date,
+      fromCity: localForm.pickup,
+      toCity: localForm.package,
+      mobile: localForm.mobile,
+      rawFormData: { ...localForm },
+    });
+    setBookingForm((p) => ({ ...p, customerMobile: localForm.mobile }));
+    setBookingConfirmed(false);
+    setShowBookingModal(true);
   };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
@@ -216,35 +725,35 @@ function CabWebsite() {
   const fleet = [
     {
       name: "Hatchback",
-      rate: "\u20b910/km",
+      rate: "₹12/km",
       seats: 3,
       img: "/assets/generated/car-hatchback.dim_400x250.png",
       examples: "Swift, WagonR",
     },
     {
       name: "Sedan",
-      rate: "\u20b911/km",
+      rate: "₹15/km",
       seats: 4,
       img: "/assets/generated/car-sedan.dim_400x250.png",
       examples: "Honda City, Dzire",
     },
     {
       name: "SUV Ertiga",
-      rate: "\u20b913/km",
+      rate: "₹18/km",
       seats: 6,
       img: "/assets/generated/car-suv.dim_400x250.png",
       examples: "Maruti Ertiga",
     },
     {
       name: "Innova / Marazzo",
-      rate: "\u20b917/km",
+      rate: "₹20/km",
       seats: 7,
       img: "/assets/generated/car-innova.dim_400x250.png",
       examples: "Innova, Marazzo",
     },
     {
       name: "Innova Crysta",
-      rate: "\u20b920/km",
+      rate: "₹24/km",
       seats: 7,
       img: "/assets/generated/car-innova-crysta.dim_400x250.png",
       examples: "Toyota Innova Crysta",
@@ -562,23 +1071,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="ow-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={oneWayForm.pickup}
-                          onChange={(e) =>
-                            setOneWayForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="ow-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={oneWayForm.pickup}
+                        onChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -587,23 +1089,16 @@ function CabWebsite() {
                       >
                         Drop City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="ow-drop"
-                          placeholder="e.g. Mumbai"
-                          className="pl-9"
-                          value={oneWayForm.drop}
-                          onChange={(e) =>
-                            setOneWayForm((p) => ({
-                              ...p,
-                              drop: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="ow-drop"
+                        placeholder="e.g. Mumbai"
+                        value={oneWayForm.drop}
+                        onChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, drop: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -671,18 +1166,134 @@ function CabWebsite() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-end">
-                      <Button
-                        type="submit"
-                        className="w-full bg-primary text-primary-foreground font-bold"
-                        disabled={submitInquiry.isPending}
-                        data-ocid="booking.submit_button"
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">
+                        Vehicle Type
+                      </Label>
+                      <Select
+                        value={oneWayForm.vehicleType}
+                        onValueChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, vehicleType: v }))
+                        }
                       >
-                        {submitInquiry.isPending
-                          ? "Submitting..."
-                          : "Explore Cabs \u2192"}
-                      </Button>
+                        <SelectTrigger data-ocid="booking.select">
+                          <SelectValue placeholder="Select vehicle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hatchback">
+                            Hatchback (Swift, WagonR)
+                          </SelectItem>
+                          <SelectItem value="sedan">
+                            Sedan (Honda City, Dzire)
+                          </SelectItem>
+                          <SelectItem value="suv">SUV Ertiga</SelectItem>
+                          <SelectItem value="innova">
+                            Innova / Marazzo
+                          </SelectItem>
+                          <SelectItem value="innova_crysta">
+                            Innova Crysta
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="ow-distance"
+                        className="text-sm font-semibold"
+                      >
+                        Distance (km)
+                      </Label>
+                      <div className="relative">
+                        {isFetchingDistance ? (
+                          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                        ) : (
+                          <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        )}
+                        <Input
+                          id="ow-distance"
+                          type="number"
+                          min="1"
+                          placeholder="Auto calculated..."
+                          className="pl-9"
+                          value={oneWayForm.distance}
+                          onChange={(e) =>
+                            setOneWayForm((p) => ({
+                              ...p,
+                              distance: e.target.value,
+                            }))
+                          }
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {isFetchingDistance
+                          ? "Distance fetch ho raha hai..."
+                          : "City naam dalne ke baad distance automatic aayega"}
+                      </p>
+                    </div>
+                  </div>
+                  {(() => {
+                    const owRates: Record<string, number> = {
+                      hatchback: 12,
+                      sedan: 15,
+                      suv: 18,
+                      innova: 20,
+                      innova_crysta: 24,
+                    };
+                    const owVehicleNames: Record<string, string> = {
+                      hatchback: "Hatchback",
+                      sedan: "Sedan",
+                      suv: "SUV Ertiga",
+                      innova: "Innova / Marazzo",
+                      innova_crysta: "Innova Crysta",
+                    };
+                    const rate = owRates[oneWayForm.vehicleType];
+                    const dist = Number.parseFloat(oneWayForm.distance);
+                    if (!rate || !dist || dist <= 0) return null;
+                    const fare = rate * dist;
+                    return (
+                      <div
+                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
+                        data-ocid="booking.card"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-green-600 text-lg">🧮</span>
+                          <span className="font-bold text-base text-green-800">
+                            Fare Estimate —{" "}
+                            {owVehicleNames[oneWayForm.vehicleType]}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                          <span className="text-green-700">Distance:</span>
+                          <span className="font-semibold">{dist} km</span>
+                          <span className="text-green-700">Rate:</span>
+                          <span className="font-semibold">₹{rate}/km</span>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
+                          <span className="font-bold text-green-800">
+                            Estimated Fare:
+                          </span>
+                          <span className="font-bold text-xl text-green-700">
+                            ₹{fare.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-green-600 italic">
+                          * Toll & Parking charges extra
+                        </p>
+                      </div>
+                    );
+                  })()}
+                  <div className="mt-4">
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary text-primary-foreground font-bold"
+                      disabled={submitInquiry.isPending}
+                      data-ocid="booking.submit_button"
+                    >
+                      {submitInquiry.isPending
+                        ? "Submitting..."
+                        : "Explore Cabs →"}
+                    </Button>
                   </div>
                 </form>
               </TabsContent>
@@ -698,23 +1309,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="rt-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={roundTripForm.pickup}
-                          onChange={(e) =>
-                            setRoundTripForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="rt-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={roundTripForm.pickup}
+                        onChange={(v) =>
+                          setRoundTripForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label
@@ -723,22 +1327,100 @@ function CabWebsite() {
                       >
                         Destination City
                       </Label>
+                      <CityInput
+                        id="rt-dest"
+                        placeholder="e.g. Pune"
+                        value={roundTripForm.destination}
+                        onChange={(v) =>
+                          setRoundTripForm((p) => ({ ...p, destination: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
+                    </div>
+                    {/* Drop Stops */}
+                    {roundTripForm.dropCities.map((city, idx) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: drop cities are positional
+                      <div key={idx} className="space-y-1">
+                        <Label className="text-sm font-semibold">
+                          Drop Stop {idx + 1}
+                        </Label>
+                        <div className="flex gap-2">
+                          <CityInput
+                            id={`rt-drop-${idx}`}
+                            placeholder="e.g. Nashik"
+                            value={city}
+                            onChange={(v) => {
+                              const updated = [...roundTripForm.dropCities];
+                              updated[idx] = v;
+                              setRoundTripForm((p) => ({
+                                ...p,
+                                dropCities: updated,
+                              }));
+                            }}
+                            dataOcid="booking.input"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = roundTripForm.dropCities.filter(
+                                (_, i) => i !== idx,
+                              );
+                              setRoundTripForm((p) => ({
+                                ...p,
+                                dropCities: updated,
+                              }));
+                            }}
+                            className="flex-shrink-0 w-8 h-10 flex items-center justify-center rounded-md border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
+                            data-ocid="booking.delete_button"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {/* Add Drop Button */}
+                    <div className="space-y-1 flex items-end">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setRoundTripForm((p) => ({
+                            ...p,
+                            dropCities: [...p.dropCities, ""],
+                          }))
+                        }
+                        className="flex items-center gap-1 px-3 py-2 text-sm font-medium border border-primary text-primary rounded-md hover:bg-primary/10 transition-colors"
+                        data-ocid="booking.secondary_button"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Drop
+                      </button>
+                    </div>
+                    {/* Auto Distance Display */}
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">
+                        Estimated Distance (Round Trip)
+                      </Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                         <Input
-                          id="rt-dest"
-                          placeholder="e.g. Pune"
-                          className="pl-9"
-                          value={roundTripForm.destination}
-                          onChange={(e) =>
-                            setRoundTripForm((p) => ({
-                              ...p,
-                              destination: e.target.value,
-                            }))
+                          readOnly
+                          placeholder={
+                            isFetchingRtDistance
+                              ? "Calculating..."
+                              : "Auto-calculated"
                           }
-                          required
+                          value={
+                            roundTripForm.distance
+                              ? `${roundTripForm.distance} km`
+                              : ""
+                          }
+                          className="pl-9 bg-muted/50 cursor-not-allowed"
                           data-ocid="booking.input"
                         />
+                        {isFetchingRtDistance && (
+                          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-primary" />
+                        )}
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -811,18 +1493,121 @@ function CabWebsite() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-end">
-                      <Button
-                        type="submit"
-                        className="w-full bg-primary text-primary-foreground font-bold"
-                        disabled={submitInquiry.isPending}
-                        data-ocid="booking.submit_button"
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">
+                        Vehicle Type
+                      </Label>
+                      <Select
+                        value={roundTripForm.vehicleType}
+                        onValueChange={(v) =>
+                          setRoundTripForm((p) => ({ ...p, vehicleType: v }))
+                        }
                       >
-                        {submitInquiry.isPending
-                          ? "Submitting..."
-                          : "Explore Cabs \u2192"}
-                      </Button>
+                        <SelectTrigger data-ocid="booking.select">
+                          <SelectValue placeholder="Select vehicle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hatchback">
+                            Hatchback (Swift, WagonR)
+                          </SelectItem>
+                          <SelectItem value="sedan">
+                            Sedan (Honda City, Dzire)
+                          </SelectItem>
+                          <SelectItem value="suv">SUV Ertiga</SelectItem>
+                          <SelectItem value="innova">
+                            Innova / Marazzo
+                          </SelectItem>
+                          <SelectItem value="innova_crysta">
+                            Innova Crysta
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+                  </div>
+                  {(() => {
+                    const rtRates: Record<string, number> = {
+                      hatchback: 10,
+                      sedan: 12,
+                      suv: 15,
+                      innova: 17,
+                      innova_crysta: 20,
+                    };
+                    const rtVehicleNames: Record<string, string> = {
+                      hatchback: "Hatchback",
+                      sedan: "Sedan",
+                      suv: "SUV Ertiga",
+                      innova: "Innova / Marazzo",
+                      innova_crysta: "Innova Crysta",
+                    };
+                    const rate = rtRates[roundTripForm.vehicleType];
+                    const days = Number.parseInt(roundTripForm.days);
+                    if (!rate || !days || days <= 0) return null;
+                    const distanceVal = Number.parseInt(roundTripForm.distance);
+                    const minKm = distanceVal > 0 ? distanceVal : days * 300;
+                    const baseFare = minKm * rate;
+                    const driverAllowance = days * 400;
+                    const total = baseFare + driverAllowance;
+                    return (
+                      <div
+                        className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-900"
+                        data-ocid="booking.card"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-green-600 text-lg">🧮</span>
+                          <span className="font-bold text-base text-green-800">
+                            Fare Estimate —{" "}
+                            {rtVehicleNames[roundTripForm.vehicleType]}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                          <span className="text-green-700">
+                            Minimum Distance:
+                          </span>
+                          <span className="font-semibold">
+                            {minKm} km{" "}
+                            {distanceVal > 0
+                              ? "(auto-calculated)"
+                              : `(${days} days × 300 km)`}
+                          </span>
+                          <span className="text-green-700">Rate:</span>
+                          <span className="font-semibold">₹{rate}/km</span>
+                          <span className="text-green-700">Base Fare:</span>
+                          <span className="font-semibold">
+                            ₹{baseFare.toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-green-700">
+                            Driver Allowance:
+                          </span>
+                          <span className="font-semibold">
+                            ₹{driverAllowance.toLocaleString("en-IN")} ({days}{" "}
+                            days × ₹400)
+                          </span>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-green-300 flex justify-between items-center">
+                          <span className="font-bold text-green-800">
+                            Total Estimate:
+                          </span>
+                          <span className="font-bold text-xl text-green-700">
+                            ₹{total.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-green-600 italic">
+                          * Toll & Parking charges extra
+                        </p>
+                      </div>
+                    );
+                  })()}
+                  <div className="mt-4">
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary text-primary-foreground font-bold"
+                      disabled={submitInquiry.isPending}
+                      data-ocid="booking.submit_button"
+                    >
+                      {submitInquiry.isPending
+                        ? "Submitting..."
+                        : "Explore Cabs →"}
+                    </Button>
                   </div>
                 </form>
               </TabsContent>
@@ -838,23 +1623,16 @@ function CabWebsite() {
                       >
                         Pickup City
                       </Label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="local-pickup"
-                          placeholder="e.g. Nagpur"
-                          className="pl-9"
-                          value={localForm.pickup}
-                          onChange={(e) =>
-                            setLocalForm((p) => ({
-                              ...p,
-                              pickup: e.target.value,
-                            }))
-                          }
-                          required
-                          data-ocid="booking.input"
-                        />
-                      </div>
+                      <CityInput
+                        id="local-pickup"
+                        placeholder="e.g. Nagpur"
+                        value={localForm.pickup}
+                        onChange={(v) =>
+                          setLocalForm((p) => ({ ...p, pickup: v }))
+                        }
+                        required
+                        dataOcid="booking.input"
+                      />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-sm font-semibold">Package</Label>
@@ -1829,6 +2607,474 @@ function CabWebsite() {
           <Phone className="w-6 h-6" />
         </a>
       </div>
+
+      {/* Booking Details Modal */}
+      <AnimatePresence>
+        {showBookingModal && bookingDetailsData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowBookingModal(false);
+            }}
+            data-ocid="booking.modal"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-amber-500 rounded-t-2xl">
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    Complete Your Booking
+                  </h2>
+                  <p className="text-orange-100 text-sm mt-0.5">
+                    Fill details to confirm your cab
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBookingModal(false)}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                  data-ocid="booking.close_button"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {!bookingConfirmed ? (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const d = bookingDetailsData;
+                    const combinedName = `${bookingForm.customerName} | ${bookingForm.customerMobile} | Adults:${bookingForm.adults} Children:${bookingForm.children} | Luggage:${bookingForm.luggage} | Pickup:${bookingForm.pickupAddress} | Drop:${bookingForm.dropAddress}`;
+                    try {
+                      await submitInquiry.mutateAsync({
+                        tripType: d.tripType.toLowerCase().replace(" ", "-"),
+                        pickupCity: d.fromCity,
+                        dropCity: d.toCity,
+                        pickupDate: d.date,
+                        pickupTime: "",
+                        mobile: bookingForm.customerMobile,
+                        name: combinedName,
+                      });
+                      setBookingConfirmed(true);
+                      // Reset forms
+                      setOneWayForm({
+                        pickup: "",
+                        drop: "",
+                        date: "",
+                        time: "",
+                        mobile: "",
+                        vehicleType: "",
+                        distance: "",
+                      });
+                      setRoundTripForm({
+                        pickup: "",
+                        destination: "",
+                        dropCities: [],
+                        date: "",
+                        days: "",
+                        mobile: "",
+                        vehicleType: "",
+                        distance: "",
+                      });
+                      setLocalForm({
+                        pickup: "",
+                        package: "",
+                        date: "",
+                        time: "",
+                        mobile: "",
+                      });
+                    } catch {
+                      toast.error(
+                        "Booking failed. Please call us directly at 8128932525",
+                      );
+                    }
+                  }}
+                  className="p-5 space-y-4"
+                >
+                  {/* Trip Summary Badge */}
+                  <div className="flex flex-wrap gap-2 p-3 bg-orange-50 rounded-xl border border-orange-200">
+                    <span className="text-sm font-semibold text-orange-700">
+                      🚗 {bookingDetailsData.tripType}
+                    </span>
+                    <span className="text-sm text-orange-600">
+                      • {bookingDetailsData.vehicleType}
+                    </span>
+                    <span className="text-sm text-orange-600">
+                      • {bookingDetailsData.fromCity} →{" "}
+                      {bookingDetailsData.toCity}
+                    </span>
+                    {bookingDetailsData.date && (
+                      <span className="text-sm text-orange-600">
+                        • {bookingDetailsData.date}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="bm-name"
+                        className="text-sm font-semibold text-gray-700"
+                      >
+                        Full Name *
+                      </Label>
+                      <Input
+                        id="bm-name"
+                        placeholder="Your full name"
+                        value={bookingForm.customerName}
+                        onChange={(e) =>
+                          setBookingForm((p) => ({
+                            ...p,
+                            customerName: e.target.value,
+                          }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="bm-mobile"
+                        className="text-sm font-semibold text-gray-700"
+                      >
+                        Mobile Number *
+                      </Label>
+                      <Input
+                        id="bm-mobile"
+                        type="tel"
+                        placeholder="10-digit mobile"
+                        value={bookingForm.customerMobile}
+                        onChange={(e) =>
+                          setBookingForm((p) => ({
+                            ...p,
+                            customerMobile: e.target.value,
+                          }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="bm-pickup"
+                      className="text-sm font-semibold text-gray-700"
+                    >
+                      Pickup Address *
+                    </Label>
+                    <Textarea
+                      id="bm-pickup"
+                      placeholder="Full pickup address (house no, street, area, city)"
+                      rows={2}
+                      value={bookingForm.pickupAddress}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          pickupAddress: e.target.value,
+                        }))
+                      }
+                      required
+                      data-ocid="booking.textarea"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="bm-drop"
+                      className="text-sm font-semibold text-gray-700"
+                    >
+                      Drop Address *
+                    </Label>
+                    <Textarea
+                      id="bm-drop"
+                      placeholder="Full drop address (house no, street, area, city)"
+                      rows={2}
+                      value={bookingForm.dropAddress}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          dropAddress: e.target.value,
+                        }))
+                      }
+                      required
+                      data-ocid="booking.textarea"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-gray-700">
+                      Travellers
+                    </Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="bm-adults"
+                          className="text-xs text-gray-500"
+                        >
+                          Adults (min 1)
+                        </Label>
+                        <Input
+                          id="bm-adults"
+                          type="number"
+                          min={1}
+                          value={bookingForm.adults}
+                          onChange={(e) =>
+                            setBookingForm((p) => ({
+                              ...p,
+                              adults: Number(e.target.value),
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label
+                          htmlFor="bm-children"
+                          className="text-xs text-gray-500"
+                        >
+                          Children
+                        </Label>
+                        <Input
+                          id="bm-children"
+                          type="number"
+                          min={0}
+                          value={bookingForm.children}
+                          onChange={(e) =>
+                            setBookingForm((p) => ({
+                              ...p,
+                              children: Number(e.target.value),
+                            }))
+                          }
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="bm-luggage"
+                      className="text-sm font-semibold text-gray-700"
+                    >
+                      Luggage Details
+                    </Label>
+                    <Textarea
+                      id="bm-luggage"
+                      placeholder="Describe your luggage (e.g. 2 suitcases, 1 backpack)"
+                      rows={2}
+                      value={bookingForm.luggage}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          luggage: e.target.value,
+                        }))
+                      }
+                      data-ocid="booking.textarea"
+                    />
+                  </div>
+
+                  {/* Fare & Advance Section */}
+                  {bookingDetailsData.fare > 0 && (
+                    <div className="rounded-xl overflow-hidden border border-orange-300">
+                      <div className="p-3 bg-green-50 border-b border-green-200 flex justify-between items-center">
+                        <span className="text-green-800 font-semibold text-sm">
+                          💰 Estimated Fare
+                        </span>
+                        <span className="text-green-700 font-bold text-lg">
+                          ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <div className="p-4 bg-orange-500 flex justify-between items-center">
+                        <div>
+                          <p className="text-white font-bold text-base">
+                            ⚡ Advance to Pay (20%)
+                          </p>
+                          <p className="text-orange-100 text-xs mt-0.5">
+                            Pay this amount via QR to confirm booking
+                          </p>
+                        </div>
+                        <span className="text-white font-bold text-2xl">
+                          ₹
+                          {Math.round(
+                            bookingDetailsData.fare * 0.2,
+                          ).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* QR Code Section */}
+                  <div className="rounded-xl border-2 border-orange-200 p-4 bg-orange-50 text-center">
+                    <p className="font-bold text-orange-800 text-sm mb-3">
+                      📱 Pay Advance via UPI / QR Code
+                    </p>
+                    <div className="flex justify-center mb-3">
+                      <img
+                        src="/assets/uploads/Screenshot_2026-03-11-06-50-55-05_4336b74596784d9a2aa81f87c2016f50-1.jpg"
+                        alt="UPI QR Code"
+                        className="w-48 h-48 object-contain rounded-xl border-2 border-orange-300 shadow-md"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-orange-800 font-semibold text-sm">
+                        UPI ID:{" "}
+                        <span className="font-mono bg-white px-2 py-0.5 rounded border border-orange-200 text-orange-700">
+                          raktnasha@oksbi
+                        </span>
+                      </p>
+                      <p className="text-orange-700 text-sm">
+                        Name: <strong>ritesh gadhiya</strong>
+                      </p>
+                      {bookingDetailsData.fare > 0 && (
+                        <p className="text-orange-800 font-bold text-base mt-2">
+                          Pay ₹
+                          {Math.round(
+                            bookingDetailsData.fare * 0.2,
+                          ).toLocaleString("en-IN")}{" "}
+                          as advance
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-orange-600 text-xs mt-2 italic">
+                      * Remaining balance payable at pickup. Toll & Parking
+                      extra.
+                    </p>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-base rounded-xl"
+                    disabled={submitInquiry.isPending}
+                    data-ocid="booking.confirm_button"
+                  >
+                    {submitInquiry.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "✅ Confirm Booking"
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                /* Success State */
+                <div
+                  className="p-6 text-center space-y-5"
+                  data-ocid="booking.success_state"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", damping: 15, stiffness: 300 }}
+                    className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto"
+                  >
+                    <CheckCircle className="w-10 h-10 text-green-500" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-800">
+                      Booking Confirmed! 🎉
+                    </h3>
+                    <p className="text-gray-500 mt-1 text-sm">
+                      Your cab has been booked successfully
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-4 text-left text-sm space-y-1.5">
+                    <p>
+                      <span className="text-gray-500">Name:</span>{" "}
+                      <strong>{bookingForm.customerName}</strong>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Trip:</span>{" "}
+                      <strong>
+                        {bookingDetailsData.tripType} •{" "}
+                        {bookingDetailsData.vehicleType}
+                      </strong>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">From:</span>{" "}
+                      <strong>{bookingDetailsData.fromCity}</strong>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">To:</span>{" "}
+                      <strong>{bookingDetailsData.toCity}</strong>
+                    </p>
+                    {bookingDetailsData.fare > 0 && (
+                      <>
+                        <p>
+                          <span className="text-gray-500">Total Fare:</span>{" "}
+                          <strong>
+                            ₹{bookingDetailsData.fare.toLocaleString("en-IN")}
+                          </strong>
+                        </p>
+                        <p>
+                          <span className="text-gray-500">
+                            Advance Paid (20%):
+                          </span>{" "}
+                          <strong className="text-orange-600">
+                            ₹
+                            {Math.round(
+                              bookingDetailsData.fare * 0.2,
+                            ).toLocaleString("en-IN")}
+                          </strong>
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 font-medium">
+                      Send booking details via:
+                    </p>
+                    <a
+                      href={`https://wa.me/917499685759?text=${encodeURIComponent(`🚗 *Sarthi Parivar Cab - Booking Confirmed!*\n\n👤 Name: ${bookingForm.customerName}\n📱 Mobile: ${bookingForm.customerMobile}\n🗺 Trip: ${bookingDetailsData.tripType}\n📍 Pickup: ${bookingForm.pickupAddress}\n📍 Drop: ${bookingForm.dropAddress}\n👥 Travellers: ${bookingForm.adults} Adults, ${bookingForm.children} Children\n🧳 Luggage: ${bookingForm.luggage || "Not specified"}\n💰 Total Fare: ₹${bookingDetailsData.fare.toLocaleString("en-IN")}\n💳 Advance (20%): ₹${Math.round(bookingDetailsData.fare * 0.2).toLocaleString("en-IN")}\n📅 Date: ${bookingDetailsData.date}\n🚗 Vehicle: ${bookingDetailsData.vehicleType}\n\n📞 Contact: 8128932525\nThank you for choosing Sarthi Parivar Cab!`)}`}
+                      className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors"
+                      data-ocid="booking.primary_button"
+                    >
+                      <SiWhatsapp className="w-5 h-5" />
+                      Send via WhatsApp
+                    </a>
+                    <a
+                      href={`sms:8128932525?body=${encodeURIComponent(
+                        `Sarthi Parivar Cab - Booking: ${bookingForm.customerName}, ${bookingDetailsData.tripType}, ${bookingDetailsData.fromCity} to ${bookingDetailsData.toCity}, ${bookingDetailsData.date}, Vehicle: ${bookingDetailsData.vehicleType}, Fare: Rs.${bookingDetailsData.fare}, Advance: Rs.${Math.round(bookingDetailsData.fare * 0.2)}. Contact: 8128932525`,
+                      )}`}
+                      className="flex items-center justify-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors"
+                      data-ocid="booking.secondary_button"
+                    >
+                      <Phone className="w-5 h-5" />
+                      Send via SMS
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setShowBookingModal(false)}
+                      className="w-full text-gray-500 hover:text-gray-700 text-sm py-2 transition-colors"
+                      data-ocid="booking.close_button"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Toaster />
     </div>
