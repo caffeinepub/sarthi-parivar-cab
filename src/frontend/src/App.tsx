@@ -1,0 +1,1577 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Toaster } from "@/components/ui/sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useSubmitContact, useSubmitInquiry } from "@/hooks/useQueries";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Car,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  FileText,
+  Headphones,
+  Mail,
+  MapPin,
+  Menu,
+  MessageCircle,
+  Phone,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
+import { toast } from "sonner";
+
+const queryClient = new QueryClient();
+
+function CabWebsite() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  const [oneWayForm, setOneWayForm] = useState({
+    pickup: "",
+    drop: "",
+    date: "",
+    time: "",
+    mobile: "",
+  });
+  const [roundTripForm, setRoundTripForm] = useState({
+    pickup: "",
+    destination: "",
+    date: "",
+    days: "",
+    mobile: "",
+  });
+  const [localForm, setLocalForm] = useState({
+    pickup: "",
+    package: "",
+    date: "",
+    time: "",
+    mobile: "",
+  });
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  const submitInquiry = useSubmitInquiry();
+  const submitContact = useSubmitContact();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMobileMenuOpen(false);
+  };
+
+  const handleOneWaySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitInquiry.mutateAsync({
+        tripType: "one-way",
+        pickupCity: oneWayForm.pickup,
+        dropCity: oneWayForm.drop,
+        pickupDate: oneWayForm.date,
+        pickupTime: oneWayForm.time,
+        mobile: oneWayForm.mobile,
+      });
+      toast.success("Booking inquiry submitted! We'll contact you shortly.");
+      setOneWayForm({ pickup: "", drop: "", date: "", time: "", mobile: "" });
+    } catch {
+      toast.error("Failed to submit. Please call us directly.");
+    }
+  };
+
+  const handleRoundTripSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitInquiry.mutateAsync({
+        tripType: "round-trip",
+        pickupCity: roundTripForm.pickup,
+        dropCity: roundTripForm.destination,
+        pickupDate: roundTripForm.date,
+        pickupTime: `${roundTripForm.days} days`,
+        mobile: roundTripForm.mobile,
+      });
+      toast.success("Round trip inquiry submitted! We'll contact you shortly.");
+      setRoundTripForm({
+        pickup: "",
+        destination: "",
+        date: "",
+        days: "",
+        mobile: "",
+      });
+    } catch {
+      toast.error("Failed to submit. Please call us directly.");
+    }
+  };
+
+  const handleLocalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitInquiry.mutateAsync({
+        tripType: "local",
+        pickupCity: localForm.pickup,
+        dropCity: "",
+        pickupDate: localForm.date,
+        pickupTime: localForm.time,
+        mobile: localForm.mobile,
+        name: localForm.package,
+      });
+      toast.success("Local booking inquiry submitted!");
+      setLocalForm({ pickup: "", package: "", date: "", time: "", mobile: "" });
+    } catch {
+      toast.error("Failed to submit. Please call us directly.");
+    }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitContact.mutateAsync(contactForm);
+      toast.success("Message sent! We'll get back to you soon.");
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+    } catch {
+      toast.error("Failed to send message. Please email us directly.");
+    }
+  };
+
+  const navLinks = [
+    { label: "Home", id: "home" },
+    { label: "About", id: "about" },
+    { label: "Services", id: "services" },
+    { label: "Fleet", id: "fleet" },
+    { label: "Contact", id: "contact" },
+  ];
+
+  const features = [
+    {
+      icon: <Car className="w-8 h-8" />,
+      title: "Clean & Comfortable Cars",
+      desc: "Sanitized, well-maintained vehicles for every journey",
+    },
+    {
+      icon: <FileText className="w-8 h-8" />,
+      title: "Transparent Billing",
+      desc: "No hidden charges. What you see is what you pay",
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: "Reliable Service",
+      desc: "On-time pickups and safe, professional driving",
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: "Professional Drivers",
+      desc: "Verified, licensed, and courteous drivers always",
+    },
+    {
+      icon: <Headphones className="w-8 h-8" />,
+      title: "24/7 Support",
+      desc: "Round-the-clock assistance for all your travel needs",
+    },
+  ];
+
+  const fleet = [
+    {
+      name: "Hatchback",
+      rate: "\u20b910/km",
+      seats: 3,
+      img: "/assets/generated/car-hatchback.dim_400x250.png",
+      examples: "Swift, WagonR",
+    },
+    {
+      name: "Sedan",
+      rate: "\u20b911/km",
+      seats: 4,
+      img: "/assets/generated/car-sedan.dim_400x250.png",
+      examples: "Honda City, Dzire",
+    },
+    {
+      name: "SUV Ertiga",
+      rate: "\u20b913/km",
+      seats: 6,
+      img: "/assets/generated/car-suv.dim_400x250.png",
+      examples: "Maruti Ertiga",
+    },
+    {
+      name: "Innova / Marazzo",
+      rate: "\u20b917/km",
+      seats: 7,
+      img: "/assets/generated/car-innova.dim_400x250.png",
+      examples: "Innova, Marazzo",
+    },
+    {
+      name: "Innova Crysta",
+      rate: "\u20b920/km",
+      seats: 7,
+      img: "/assets/generated/car-innova-crysta.dim_400x250.png",
+      examples: "Toyota Innova Crysta",
+    },
+  ];
+
+  const steps = [
+    {
+      num: "01",
+      title: "Choose a Car",
+      desc: "Select the vehicle that suits your group and budget",
+    },
+    {
+      num: "02",
+      title: "Pick Up Date",
+      desc: "Choose your travel date and preferred pick-up time",
+    },
+    {
+      num: "03",
+      title: "Confirm Booking",
+      desc: "Confirm your details and we'll send a confirmation",
+    },
+    {
+      num: "04",
+      title: "Enjoy Your Trip",
+      desc: "Relax and enjoy a safe, comfortable journey",
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "Rajesh Sharma",
+      city: "Nagpur",
+      rating: 5,
+      text: "Excellent service! The driver was on time, the car was spotless, and the pricing was completely transparent. Highly recommend Sarthi Parivar!",
+    },
+    {
+      name: "Priya Deshmukh",
+      city: "Amravati",
+      rating: 5,
+      text: "Booked an Innova for a family trip to Shirdi. Comfortable journey, professional driver, and great value. Will definitely book again!",
+    },
+    {
+      name: "Amit Kulkarni",
+      city: "Akola",
+      rating: 5,
+      text: "Used their one-way service from Nagpur to Wardha. Very smooth experience from booking to drop. Driver was polite and helpful.",
+    },
+    {
+      name: "Sunita Patil",
+      city: "Yavatmal",
+      rating: 4,
+      text: "Good cab service with friendly drivers. The 24/7 support is really helpful. I was able to reach them even at midnight for my early morning trip.",
+    },
+  ];
+
+  const containerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.1 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" as const },
+    },
+  };
+
+  const times = [
+    "12:00 AM",
+    "01:00 AM",
+    "02:00 AM",
+    "03:00 AM",
+    "04:00 AM",
+    "05:00 AM",
+    "06:00 AM",
+    "07:00 AM",
+    "08:00 AM",
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "01:00 PM",
+    "02:00 PM",
+    "03:00 PM",
+    "04:00 PM",
+    "05:00 PM",
+    "06:00 PM",
+    "07:00 PM",
+    "08:00 PM",
+    "09:00 PM",
+    "10:00 PM",
+    "11:00 PM",
+  ];
+  const localTimes = [
+    "12:00 AM",
+    "06:00 AM",
+    "07:00 AM",
+    "08:00 AM",
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "01:00 PM",
+    "02:00 PM",
+    "03:00 PM",
+    "04:00 PM",
+    "05:00 PM",
+    "06:00 PM",
+    "07:00 PM",
+    "08:00 PM",
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Sticky Navbar */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? "bg-white/95 backdrop-blur-sm shadow-md" : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => scrollTo("home")}
+            className="flex items-center gap-2"
+            data-ocid="nav.link"
+          >
+            <img
+              src="/assets/uploads/1773183168138-1.png"
+              alt="Sarthi Parivar Logo"
+              className="h-10 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <span
+              className={`font-display font-bold text-lg hidden sm:block ${
+                scrolled ? "text-foreground" : "text-white"
+              }`}
+            >
+              Sarthi Parivar
+            </span>
+          </button>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <button
+                type="button"
+                key={link.id}
+                onClick={() => scrollTo(link.id)}
+                data-ocid="nav.link"
+                className={`font-medium text-sm transition-colors hover:text-primary ${
+                  scrolled ? "text-foreground" : "text-white"
+                }`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="hidden md:flex items-center gap-2">
+            <a
+              href="tel:8128932525"
+              data-ocid="nav.primary_button"
+              className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              <Phone className="w-4 h-4" />
+              8128932525
+            </a>
+            <a
+              href="https://wa.me/917499685759"
+              target="_blank"
+              rel="noreferrer"
+              data-ocid="nav.secondary_button"
+              className="flex items-center gap-1.5 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </a>
+          </div>
+
+          {/* Mobile Toggle */}
+          <button
+            type="button"
+            className={`md:hidden p-2 ${scrolled ? "text-foreground" : "text-white"}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            data-ocid="nav.toggle"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-white border-t border-border"
+            >
+              <div className="px-4 py-4 flex flex-col gap-3">
+                {navLinks.map((link) => (
+                  <button
+                    type="button"
+                    key={link.id}
+                    onClick={() => scrollTo(link.id)}
+                    data-ocid="nav.link"
+                    className="text-left font-medium text-foreground py-2 border-b border-border/50"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+                <a
+                  href="tel:8128932525"
+                  className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-semibold justify-center"
+                >
+                  <Phone className="w-4 h-4" /> 8128932525
+                </a>
+                <a
+                  href="https://wa.me/917499685759"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold justify-center"
+                >
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Hero Section */}
+      <section
+        id="home"
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style={{
+          backgroundImage:
+            "url('/assets/generated/hero-road.dim_1600x900.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 hero-gradient" />
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-8"
+          >
+            <span className="inline-flex items-center gap-2 bg-primary/20 text-white border border-primary/40 rounded-full px-4 py-1.5 text-sm font-medium mb-4">
+              <Sparkles className="w-4 h-4 text-primary" />
+              Trusted Cab Service in Vidarbha
+            </span>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
+              Book Your Ride with{" "}
+              <span className="text-primary">Sarthi Parivar</span>
+            </h1>
+            <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto">
+              Safe, reliable, and affordable cab services for one-way, round
+              trips, and local travel across Maharashtra
+            </p>
+          </motion.div>
+
+          {/* Booking Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <Tabs defaultValue="oneway" className="w-full">
+              <TabsList className="w-full rounded-none h-12 bg-muted/50 grid grid-cols-3">
+                <TabsTrigger
+                  value="oneway"
+                  data-ocid="booking.tab"
+                  className="font-semibold"
+                >
+                  One Way
+                </TabsTrigger>
+                <TabsTrigger
+                  value="roundtrip"
+                  data-ocid="booking.tab"
+                  className="font-semibold"
+                >
+                  Round Trip
+                </TabsTrigger>
+                <TabsTrigger
+                  value="local"
+                  data-ocid="booking.tab"
+                  className="font-semibold"
+                >
+                  Local
+                </TabsTrigger>
+              </TabsList>
+
+              {/* One Way */}
+              <TabsContent value="oneway" className="p-4 sm:p-6">
+                <form onSubmit={handleOneWaySubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="ow-pickup"
+                        className="text-sm font-semibold"
+                      >
+                        Pickup City
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="ow-pickup"
+                          placeholder="e.g. Nagpur"
+                          className="pl-9"
+                          value={oneWayForm.pickup}
+                          onChange={(e) =>
+                            setOneWayForm((p) => ({
+                              ...p,
+                              pickup: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="ow-drop"
+                        className="text-sm font-semibold"
+                      >
+                        Drop City
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="ow-drop"
+                          placeholder="e.g. Mumbai"
+                          className="pl-9"
+                          value={oneWayForm.drop}
+                          onChange={(e) =>
+                            setOneWayForm((p) => ({
+                              ...p,
+                              drop: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="ow-date"
+                        className="text-sm font-semibold"
+                      >
+                        Travel Date
+                      </Label>
+                      <Input
+                        id="ow-date"
+                        type="date"
+                        value={oneWayForm.date}
+                        onChange={(e) =>
+                          setOneWayForm((p) => ({ ...p, date: e.target.value }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">
+                        Pickup Time
+                      </Label>
+                      <Select
+                        value={oneWayForm.time}
+                        onValueChange={(v) =>
+                          setOneWayForm((p) => ({ ...p, time: v }))
+                        }
+                      >
+                        <SelectTrigger data-ocid="booking.select">
+                          <SelectValue placeholder="Select time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {times.map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="ow-mobile"
+                        className="text-sm font-semibold"
+                      >
+                        Mobile Number
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="ow-mobile"
+                          type="tel"
+                          placeholder="Your mobile"
+                          className="pl-9"
+                          value={oneWayForm.mobile}
+                          onChange={(e) =>
+                            setOneWayForm((p) => ({
+                              ...p,
+                              mobile: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary text-primary-foreground font-bold"
+                        disabled={submitInquiry.isPending}
+                        data-ocid="booking.submit_button"
+                      >
+                        {submitInquiry.isPending
+                          ? "Submitting..."
+                          : "Explore Cabs \u2192"}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </TabsContent>
+
+              {/* Round Trip */}
+              <TabsContent value="roundtrip" className="p-4 sm:p-6">
+                <form onSubmit={handleRoundTripSubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="rt-pickup"
+                        className="text-sm font-semibold"
+                      >
+                        Pickup City
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="rt-pickup"
+                          placeholder="e.g. Nagpur"
+                          className="pl-9"
+                          value={roundTripForm.pickup}
+                          onChange={(e) =>
+                            setRoundTripForm((p) => ({
+                              ...p,
+                              pickup: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="rt-dest"
+                        className="text-sm font-semibold"
+                      >
+                        Destination City
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="rt-dest"
+                          placeholder="e.g. Pune"
+                          className="pl-9"
+                          value={roundTripForm.destination}
+                          onChange={(e) =>
+                            setRoundTripForm((p) => ({
+                              ...p,
+                              destination: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="rt-date"
+                        className="text-sm font-semibold"
+                      >
+                        Travel Date
+                      </Label>
+                      <Input
+                        id="rt-date"
+                        type="date"
+                        value={roundTripForm.date}
+                        onChange={(e) =>
+                          setRoundTripForm((p) => ({
+                            ...p,
+                            date: e.target.value,
+                          }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="rt-days"
+                        className="text-sm font-semibold"
+                      >
+                        Number of Days
+                      </Label>
+                      <Input
+                        id="rt-days"
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 3"
+                        value={roundTripForm.days}
+                        onChange={(e) =>
+                          setRoundTripForm((p) => ({
+                            ...p,
+                            days: e.target.value,
+                          }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="rt-mobile"
+                        className="text-sm font-semibold"
+                      >
+                        Mobile Number
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="rt-mobile"
+                          type="tel"
+                          placeholder="Your mobile"
+                          className="pl-9"
+                          value={roundTripForm.mobile}
+                          onChange={(e) =>
+                            setRoundTripForm((p) => ({
+                              ...p,
+                              mobile: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary text-primary-foreground font-bold"
+                        disabled={submitInquiry.isPending}
+                        data-ocid="booking.submit_button"
+                      >
+                        {submitInquiry.isPending
+                          ? "Submitting..."
+                          : "Explore Cabs \u2192"}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </TabsContent>
+
+              {/* Local */}
+              <TabsContent value="local" className="p-4 sm:p-6">
+                <form onSubmit={handleLocalSubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="local-pickup"
+                        className="text-sm font-semibold"
+                      >
+                        Pickup City
+                      </Label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="local-pickup"
+                          placeholder="e.g. Nagpur"
+                          className="pl-9"
+                          value={localForm.pickup}
+                          onChange={(e) =>
+                            setLocalForm((p) => ({
+                              ...p,
+                              pickup: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">Package</Label>
+                      <Select
+                        value={localForm.package}
+                        onValueChange={(v) =>
+                          setLocalForm((p) => ({ ...p, package: v }))
+                        }
+                      >
+                        <SelectTrigger data-ocid="booking.select">
+                          <SelectValue placeholder="Select package" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="4hrs-40km">
+                            4 Hrs / 40 Km
+                          </SelectItem>
+                          <SelectItem value="8hrs-80km">
+                            8 Hrs / 80 Km
+                          </SelectItem>
+                          <SelectItem value="10hrs-100km">
+                            10 Hrs / 100 Km
+                          </SelectItem>
+                          <SelectItem value="12hrs-120km">
+                            12 Hrs / 120 Km
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="local-date"
+                        className="text-sm font-semibold"
+                      >
+                        Date
+                      </Label>
+                      <Input
+                        id="local-date"
+                        type="date"
+                        value={localForm.date}
+                        onChange={(e) =>
+                          setLocalForm((p) => ({ ...p, date: e.target.value }))
+                        }
+                        required
+                        data-ocid="booking.input"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm font-semibold">
+                        Pickup Time
+                      </Label>
+                      <Select
+                        value={localForm.time}
+                        onValueChange={(v) =>
+                          setLocalForm((p) => ({ ...p, time: v }))
+                        }
+                      >
+                        <SelectTrigger data-ocid="booking.select">
+                          <SelectValue placeholder="Select time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {localTimes.map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor="local-mobile"
+                        className="text-sm font-semibold"
+                      >
+                        Mobile Number
+                      </Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="local-mobile"
+                          type="tel"
+                          placeholder="Your mobile"
+                          className="pl-9"
+                          value={localForm.mobile}
+                          onChange={(e) =>
+                            setLocalForm((p) => ({
+                              ...p,
+                              mobile: e.target.value,
+                            }))
+                          }
+                          required
+                          data-ocid="booking.input"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary text-primary-foreground font-bold"
+                        disabled={submitInquiry.isPending}
+                        data-ocid="booking.submit_button"
+                      >
+                        {submitInquiry.isPending
+                          ? "Submitting..."
+                          : "Book Now \u2192"}
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why Choose Us */}
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={containerVariants}
+            className="text-center mb-12"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-primary font-semibold text-sm uppercase tracking-widest mb-2"
+            >
+              Why Choose Us
+            </motion.p>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold text-foreground"
+            >
+              Travel with Confidence
+            </motion.h2>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+          >
+            {features.map((f) => (
+              <motion.div
+                key={f.title}
+                variants={itemVariants}
+                className="card-hover text-center p-6 rounded-xl border border-border bg-card"
+                data-ocid="services.card"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
+                  {f.icon}
+                </div>
+                <h3 className="font-display font-bold text-base mb-2">
+                  {f.title}
+                </h3>
+                <p className="text-muted-foreground text-sm">{f.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Stats Banner */}
+      <section className="bg-primary py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { num: "5000+", label: "Happy Customers" },
+              { num: "50+", label: "Cities Covered" },
+              { num: "10+", label: "Years Experience" },
+              { num: "24/7", label: "Customer Support" },
+            ].map((s) => (
+              <div key={s.label}>
+                <p className="font-display text-3xl sm:text-4xl font-bold text-white">
+                  {s.num}
+                </p>
+                <p className="text-white/80 text-sm mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Fleet */}
+      <section id="fleet" className="py-20 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="text-center mb-12"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-primary font-semibold text-sm uppercase tracking-widest mb-2"
+            >
+              Our Fleet
+            </motion.p>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold"
+            >
+              Choose Your Ride
+            </motion.h2>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+          >
+            {fleet.map((car) => (
+              <motion.div
+                key={car.name}
+                variants={itemVariants}
+                className="card-hover bg-white rounded-2xl border border-border overflow-hidden shadow-sm"
+                data-ocid="fleet.card"
+              >
+                <div className="bg-muted/40 p-4">
+                  <img
+                    src={car.img}
+                    alt={car.name}
+                    className="w-full h-36 object-contain"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-display font-bold text-base mb-1">
+                    {car.name}
+                  </h3>
+                  <p className="text-muted-foreground text-xs mb-2">
+                    {car.examples}
+                  </p>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-primary font-bold text-lg">
+                      {car.rate}
+                    </span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Users className="w-3 h-3" /> {car.seats} seats
+                    </span>
+                  </div>
+                  <a
+                    href="tel:8128932525"
+                    data-ocid="fleet.primary_button"
+                    className="block text-center bg-primary text-primary-foreground font-semibold text-sm py-2 rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Book Now
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="services" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="text-center mb-12"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-primary font-semibold text-sm uppercase tracking-widest mb-2"
+            >
+              How It Works
+            </motion.p>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold"
+            >
+              4 Simple Steps to Book
+            </motion.h2>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+            {steps.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
+                className="text-center relative"
+                data-ocid="steps.card"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground font-display font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                  {step.num}
+                </div>
+                {i < steps.length - 1 && (
+                  <ChevronRight className="hidden lg:block absolute right-0 top-6 -translate-y-1/2 w-8 h-8 text-primary/30" />
+                )}
+                <h3 className="font-display font-bold text-lg mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-muted-foreground text-sm">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="text-center mb-12"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-primary font-semibold text-sm uppercase tracking-widest mb-2"
+            >
+              Testimonials
+            </motion.p>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold"
+            >
+              What Our Customers Say
+            </motion.h2>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {testimonials.map((t) => (
+              <motion.div
+                key={t.name}
+                variants={itemVariants}
+                className="card-hover bg-white p-6 rounded-2xl border border-border shadow-sm"
+                data-ocid="testimonials.card"
+              >
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: t.rating }, (_, j) => (
+                    <Star
+                      key={`star-${t.name}-${j}`}
+                      className="w-4 h-4 fill-primary text-primary"
+                    />
+                  ))}
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-muted-foreground text-xs">{t.city}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+            className="text-center mb-12"
+          >
+            <motion.p
+              variants={itemVariants}
+              className="text-primary font-semibold text-sm uppercase tracking-widest mb-2"
+            >
+              Get In Touch
+            </motion.p>
+            <motion.h2
+              variants={itemVariants}
+              className="font-display text-3xl sm:text-4xl font-bold"
+            >
+              Contact Sarthi Parivar
+            </motion.h2>
+          </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h3 className="font-display text-2xl font-bold mb-6">
+                Reach Us Anytime
+              </h3>
+              <div className="space-y-4">
+                <a
+                  href="tel:8128932525"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
+                  data-ocid="contact.link"
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Call Us
+                    </p>
+                    <p className="font-bold text-lg">8128932525</p>
+                  </div>
+                </a>
+                <a
+                  href="https://wa.me/917499685759"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-green-400/50 hover:bg-green-50 transition-colors group"
+                  data-ocid="contact.link"
+                >
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      WhatsApp
+                    </p>
+                    <p className="font-bold text-lg">7499685759</p>
+                  </div>
+                </a>
+                <a
+                  href="mailto:atithicab2525@gmail.com"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors group"
+                  data-ocid="contact.link"
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Email Us
+                    </p>
+                    <p className="font-bold">atithicab2525@gmail.com</p>
+                  </div>
+                </a>
+                <div className="flex items-center gap-4 p-4 rounded-xl border border-border">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Available
+                    </p>
+                    <p className="font-bold">24 Hours / 7 Days</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="c-name" className="font-semibold">
+                      Your Name
+                    </Label>
+                    <Input
+                      id="c-name"
+                      placeholder="Rajesh Sharma"
+                      value={contactForm.name}
+                      onChange={(e) =>
+                        setContactForm((p) => ({ ...p, name: e.target.value }))
+                      }
+                      required
+                      data-ocid="contact.input"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="c-email" className="font-semibold">
+                      Email Address
+                    </Label>
+                    <Input
+                      id="c-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={contactForm.email}
+                      onChange={(e) =>
+                        setContactForm((p) => ({ ...p, email: e.target.value }))
+                      }
+                      required
+                      data-ocid="contact.input"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="c-phone" className="font-semibold">
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="c-phone"
+                    type="tel"
+                    placeholder="Your phone number"
+                    value={contactForm.phone}
+                    onChange={(e) =>
+                      setContactForm((p) => ({ ...p, phone: e.target.value }))
+                    }
+                    required
+                    data-ocid="contact.input"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="c-message" className="font-semibold">
+                    Message
+                  </Label>
+                  <Textarea
+                    id="c-message"
+                    placeholder="Tell us about your travel requirements..."
+                    rows={4}
+                    value={contactForm.message}
+                    onChange={(e) =>
+                      setContactForm((p) => ({ ...p, message: e.target.value }))
+                    }
+                    required
+                    data-ocid="contact.textarea"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground font-bold py-3"
+                  disabled={submitContact.isPending}
+                  data-ocid="contact.submit_button"
+                >
+                  {submitContact.isPending ? "Sending..." : "Send Message"}
+                </Button>
+                {submitContact.isSuccess && (
+                  <div
+                    className="flex items-center gap-2 text-green-600 text-sm"
+                    data-ocid="contact.success_state"
+                  >
+                    <CheckCircle className="w-4 h-4" /> Message sent
+                    successfully!
+                  </div>
+                )}
+                {submitContact.isError && (
+                  <div
+                    className="text-destructive text-sm"
+                    data-ocid="contact.error_state"
+                  >
+                    Failed to send. Please call us directly.
+                  </div>
+                )}
+              </form>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-foreground text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 border-b border-white/10">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <img
+                  src="/assets/uploads/1773183168138-1.png"
+                  alt="Sarthi Parivar"
+                  className="h-10 w-auto object-contain bg-white rounded p-1"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+                <span className="font-display font-bold text-lg">
+                  Sarthi Parivar
+                </span>
+              </div>
+              <p className="text-white/60 text-sm leading-relaxed">
+                Your trusted travel partner across Maharashtra. Safe,
+                comfortable, and affordable rides — always.
+              </p>
+              <div className="flex gap-3 mt-4">
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors"
+                  data-ocid="footer.link"
+                >
+                  <SiFacebook className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors"
+                  data-ocid="footer.link"
+                >
+                  <SiInstagram className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://wa.me/917499685759"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-green-500 flex items-center justify-center transition-colors"
+                  data-ocid="footer.link"
+                >
+                  <SiWhatsapp className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-display font-bold text-base mb-4">
+                Quick Links
+              </h4>
+              <ul className="space-y-2">
+                {navLinks.map((link) => (
+                  <li key={link.id}>
+                    <button
+                      type="button"
+                      onClick={() => scrollTo(link.id)}
+                      className="text-white/60 text-sm hover:text-primary transition-colors"
+                      data-ocid="footer.link"
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display font-bold text-base mb-4">
+                Our Services
+              </h4>
+              <ul className="space-y-2 text-white/60 text-sm">
+                <li>One Way Cab</li>
+                <li>Round Trip</li>
+                <li>Local Packages</li>
+                <li>Airport Transfer</li>
+                <li>Corporate Travel</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-display font-bold text-base mb-4">Contact</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a
+                    href="tel:8128932525"
+                    className="flex items-center gap-2 text-white/60 text-sm hover:text-primary transition-colors"
+                    data-ocid="footer.link"
+                  >
+                    <Phone className="w-4 h-4 shrink-0" /> 8128932525
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://wa.me/917499685759"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-white/60 text-sm hover:text-green-400 transition-colors"
+                    data-ocid="footer.link"
+                  >
+                    <MessageCircle className="w-4 h-4 shrink-0" /> 7499685759
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:atithicab2525@gmail.com"
+                    className="flex items-center gap-2 text-white/60 text-sm hover:text-primary transition-colors"
+                    data-ocid="footer.link"
+                  >
+                    <Mail className="w-4 h-4 shrink-0" />{" "}
+                    atithicab2525@gmail.com
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-white/50 text-sm">
+              &copy; 2025 Sarthi Parivar. All rights reserved.
+            </p>
+            <p className="text-white/40 text-xs">
+              Built with ❤️ using{" "}
+              <a
+                href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== "undefined" ? window.location.hostname : "")}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                caffeine.ai
+              </a>
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Floating Buttons */}
+      <div className="fixed bottom-6 right-4 flex flex-col gap-3 z-50">
+        <a
+          href="https://wa.me/917499685759"
+          target="_blank"
+          rel="noreferrer"
+          data-ocid="fab.primary_button"
+          className="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          aria-label="WhatsApp"
+        >
+          <SiWhatsapp className="w-6 h-6" />
+        </a>
+        <a
+          href="tel:8128932525"
+          data-ocid="fab.secondary_button"
+          className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          aria-label="Call us"
+        >
+          <Phone className="w-6 h-6" />
+        </a>
+      </div>
+
+      <Toaster />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CabWebsite />
+    </QueryClientProvider>
+  );
+}
