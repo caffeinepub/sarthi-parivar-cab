@@ -52,15 +52,14 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent | TouchEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (!containerRef.current?.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
+    setTimeout(() => {
+      document.addEventListener("mousedown", handler);
+      document.addEventListener("touchstart", handler);
+    }, 10);
     return () => {
       document.removeEventListener("mousedown", handler);
       document.removeEventListener("touchstart", handler);
@@ -68,10 +67,10 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
   }, [open]);
 
   const displayTime = `${pad(hour)}:${pad(minute)} ${ampm}`;
-  const radius = 100;
-  const cx = 120;
-  const cy = 120;
-  const size = 240;
+  const radius = 90;
+  const cx = 110;
+  const cy = 110;
+  const size = 220;
 
   const handleClockInteraction = (
     clientX: number,
@@ -79,8 +78,10 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
     svgEl: SVGSVGElement,
   ) => {
     const rect = svgEl.getBoundingClientRect();
-    const x = clientX - rect.left - rect.width / 2;
-    const y = clientY - rect.top - rect.height / 2;
+    const scaleX = size / rect.width;
+    const scaleY = size / rect.height;
+    const x = (clientX - rect.left) * scaleX - cx;
+    const y = (clientY - rect.top) * scaleY - cy;
     const angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
     const normalAngle = (angle + 360) % 360;
     if (mode === "hour") {
@@ -103,7 +104,6 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
   const handX = cx + radius * 0.75 * Math.cos(angleRad);
   const handY = cy + radius * 0.75 * Math.sin(angleRad);
 
-  // 12 at top (index 0), then 1,2,...,11 -- matches real clock layout
   const hourNumbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   const minuteNumbers = Array.from({ length: 12 }, (_, i) => i * 5);
   const numbers = mode === "hour" ? hourNumbers : minuteNumbers;
@@ -116,12 +116,12 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
         type="button"
         onClick={() => setOpen(!open)}
         data-ocid="booking.select"
-        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm text-left flex items-center justify-between hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-colors"
+        className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm text-left flex items-center justify-between hover:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
       >
         <span className="flex items-center gap-2">
           <svg
             aria-hidden="true"
-            className="w-4 h-4 text-orange-500"
+            className="w-4 h-4 text-green-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -155,15 +155,18 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-2xl border border-orange-100 p-4 w-72">
+        <div
+          className="absolute z-[9999] left-1/2 -translate-x-1/2 mt-2 bg-white rounded-2xl shadow-2xl border border-green-200 p-4 w-72"
+          style={{ top: "100%" }}
+        >
           <div className="flex items-center justify-center gap-2 mb-3">
             <button
               type="button"
               onClick={() => setMode("hour")}
               className={`text-2xl font-bold px-2 py-1 rounded-lg transition-colors ${
                 mode === "hour"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-700 hover:bg-orange-50"
+                  ? "bg-green-800 text-white"
+                  : "text-gray-700 hover:bg-green-50"
               }`}
             >
               {pad(hour)}
@@ -174,8 +177,8 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
               onClick={() => setMode("minute")}
               className={`text-2xl font-bold px-2 py-1 rounded-lg transition-colors ${
                 mode === "minute"
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-700 hover:bg-orange-50"
+                  ? "bg-green-800 text-white"
+                  : "text-gray-700 hover:bg-green-50"
               }`}
             >
               {pad(minute)}
@@ -189,8 +192,8 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
                 }}
                 className={`text-xs font-bold px-2 py-1 rounded-md transition-colors ${
                   ampm === "AM"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-orange-100"
+                    ? "bg-green-800 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-green-100"
                 }`}
               >
                 AM
@@ -203,8 +206,8 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
                 }}
                 className={`text-xs font-bold px-2 py-1 rounded-md transition-colors ${
                   ampm === "PM"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-orange-100"
+                    ? "bg-green-800 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-green-100"
                 }`}
               >
                 PM
@@ -236,8 +239,8 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
               cx={cx}
               cy={cy}
               r={radius + 15}
-              fill="#fff7ed"
-              stroke="#fed7aa"
+              fill="#f0fdf4"
+              stroke="#bbf7d0"
               strokeWidth="2"
             />
             <circle
@@ -245,7 +248,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
               cy={cy}
               r={radius}
               fill="white"
-              stroke="#fb923c"
+              stroke="#15803d"
               strokeWidth="1.5"
             />
 
@@ -260,7 +263,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
                   y1={cy + r1 * Math.sin(a)}
                   x2={cx + radius * Math.cos(a)}
                   y2={cy + radius * Math.sin(a)}
-                  stroke={isMajor ? "#fb923c" : "#fed7aa"}
+                  stroke={isMajor ? "#15803d" : "#86efac"}
                   strokeWidth={isMajor ? 2 : 1}
                 />
               );
@@ -268,7 +271,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
 
             {numbers.map((n, i) => {
               const a = ((i / 12) * 360 - 90) * (Math.PI / 180);
-              const r = radius - 22;
+              const r = radius - 20;
               const nx = cx + r * Math.cos(a);
               const ny = cy + r * Math.sin(a);
               const isActive = mode === "hour" ? hour === n : minute === n;
@@ -279,9 +282,9 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
                   y={ny}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fontSize="13"
+                  fontSize="12"
                   fontWeight={isActive ? "700" : "500"}
-                  fill={isActive ? "#ea580c" : "#374151"}
+                  fill={isActive ? "#15803d" : "#374151"}
                 >
                   {mode === "minute" ? pad(n) : n}
                 </text>
@@ -293,12 +296,12 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
               y1={cy}
               x2={handX}
               y2={handY}
-              stroke="#f97316"
+              stroke="#15803d"
               strokeWidth="3"
               strokeLinecap="round"
             />
-            <circle cx={cx} cy={cy} r={5} fill="#f97316" />
-            <circle cx={handX} cy={handY} r={8} fill="#f97316" opacity="0.9" />
+            <circle cx={cx} cy={cy} r={5} fill="#15803d" />
+            <circle cx={handX} cy={handY} r={8} fill="#15803d" opacity="0.9" />
           </svg>
 
           <button
@@ -307,7 +310,7 @@ export default function ClockPicker({ value, onChange }: ClockPickerProps) {
               setOpen(false);
               setMode("hour");
             }}
-            className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-xl transition-colors"
+            className="mt-3 w-full bg-green-800 hover:bg-green-900 text-white font-semibold py-2 rounded-xl transition-colors"
           >
             OK — {displayTime}
           </button>
