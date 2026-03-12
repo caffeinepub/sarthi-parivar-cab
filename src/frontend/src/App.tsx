@@ -1367,9 +1367,9 @@ function CabWebsite() {
             data-ocid="nav.link"
           >
             <img
-              src="/assets/uploads/1773183168138-1.png"
+              src="/assets/generated/sarthi-logo-rect.dim_400x160.png"
               alt="Sarthi Cab Logo"
-              className="h-20 w-auto object-contain"
+              className="h-20 w-auto object-cover rounded-lg"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
@@ -3011,9 +3011,9 @@ function CabWebsite() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <img
-                  src="/assets/uploads/1773183168138-1.png"
+                  src="/assets/generated/sarthi-logo-rect.dim_400x160.png"
                   alt="Sarthi Cab"
-                  className="h-10 w-auto object-contain bg-white rounded p-1"
+                  className="h-14 w-auto object-contain rounded"
                   onError={(e) => {
                     e.currentTarget.style.display = "none";
                   }}
