@@ -1082,7 +1082,7 @@ function CabWebsite() {
       (oneWayForm.extraBags || 0) * 150 +
       (oneWayForm.petAllowed ? 399 : 0) +
       (oneWayForm.confirmedCar ? 150 : 0);
-    const fare = rate * dist + addOns;
+    const fare = Math.max(rate * dist + addOns, 1500);
     setBookingDetailsData({
       fare,
       tripType: "One Way",
@@ -1130,7 +1130,7 @@ function CabWebsite() {
     const days = Number.parseFloat(roundTripForm.days) || 1;
     const dist = Number.parseFloat(roundTripForm.distance) || days * 300;
     const rate = rtRates[roundTripForm.vehicleType] || 12;
-    const fare = rate * dist + days * 400;
+    const fare = Math.max(rate * dist + days * 400, 1500);
     const dropCitiesStr = roundTripForm.dropCities
       .filter((c) => c.trim())
       .join(", ");
@@ -1184,7 +1184,10 @@ function CabWebsite() {
             "12hrs-120km": 3200,
           },
         };
-        return localRates[localVehicle]?.[localForm.package] || 0;
+        return Math.max(
+          localRates[localVehicle]?.[localForm.package] || 0,
+          1500,
+        );
       })(),
       tripType: "Local",
       vehicleType: localVehicleLabel || "Local Package",
@@ -1833,7 +1836,7 @@ function CabWebsite() {
                       (oneWayForm.extraBags || 0) * 150 +
                       (oneWayForm.petAllowed ? 399 : 0) +
                       (oneWayForm.confirmedCar ? 150 : 0);
-                    const fare = rate * dist + addOns;
+                    const fare = Math.max(rate * dist + addOns, 1500);
                     return (
                       <div
                         className="mt-4 p-4 rounded-xl border-2 border-green-400 bg-green-50 text-green-950"
